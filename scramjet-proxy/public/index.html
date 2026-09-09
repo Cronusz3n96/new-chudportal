@@ -14529,15 +14529,17 @@ document.addEventListener('DOMContentLoaded', function() {
 .boot-ready #chud-home-logo { animation: paneFade 0.55s ease 0.14s both; }
 #chud-home-logo {
   position: fixed;
-  top: calc(24% - 82px);
+  top: calc(24% - 96px);
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 92px;
-  height: 92px;
-  object-fit: contain;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 28px;
+  border: 2px solid rgba(255,255,255,0.35);
   z-index: 600;
   pointer-events: none;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.35));
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.4));
 }
 
 /* ── MOST RECENT CHAT (words only, under the clock) ── */
