@@ -14603,44 +14603,39 @@ document.addEventListener('DOMContentLoaded', function() {
   text-align: center;
 }
 
-/* ── MOST RECENT CHAT (top right) ── */
+/* ── MOST RECENT CHAT (words only, under the clock) ── */
 .boot-ready #most-recent-chat { animation: paneFade 0.55s ease 0.3s both; }
 #most-recent-chat {
   position: fixed;
-  top: 18px;
-  right: 22px;
+  top: 68px;
+  right: 16px;
   z-index: 600;
-  max-width: 280px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.35);
-  backdrop-filter: blur(6px);
+  text-align: right;
   color: #fff;
+  font-family: 'Courier New', monospace;
   cursor: pointer;
   pointer-events: all;
-  transition: background 0.2s ease, border-color 0.2s ease;
 }
-#most-recent-chat:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.6); }
 #most-recent-chat .mrc-label {
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   letter-spacing: 1.5px;
   font-weight: 700;
-  opacity: 0.85;
-  margin-bottom: 3px;
+  opacity: 0.75;
+  margin-bottom: 2px;
   font-family: 'Courier New', monospace;
+  transition: opacity 0.2s ease;
 }
+#most-recent-chat:hover .mrc-label { opacity: 1; text-decoration: underline; }
 #most-recent-chat .mrc-body {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 1px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.78rem;
   line-height: 1.15;
 }
 #most-recent-chat #mrc-user { font-weight: 700; color: #ffd479; }
-#most-recent-chat #mrc-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; opacity: 0.95; }
-#most-recent-chat #mrc-time { font-size: 0.6rem; opacity: 0.6; }
+#most-recent-chat #mrc-text { max-width: 300px; opacity: 0.9; }
+#most-recent-chat #mrc-time { font-size: 0.58rem; opacity: 0.55; }
 
 /* ── APP CLICK RIPPLE ── */
 .ripple {
