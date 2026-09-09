@@ -5378,7 +5378,6 @@ footer p::before {
 
       
       <!-- ── Chudoogle quick search ── -->
-      <img id="chud-home-logo" src="https://cdn.jsdelivr.net/gh/Cronusz3n96/hhbbhbh@main/logo.png" alt="chudportal">
       <div id="chud-home-search" class="home-search-wrap">
         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <input id="chud-home-search-input" type="text" placeholder="Search Chudoogle"
@@ -14532,23 +14531,6 @@ document.addEventListener('DOMContentLoaded', function() {
   caret-color: #fff;
 }
 #chud-home-search input::placeholder { color: rgba(255,255,255,0.6); }
-
-/* ── CHUDPORTAL LOGO (above the search bar) ── */
-.boot-ready #chud-home-logo { animation: paneFade 0.55s ease 0.14s both; }
-#chud-home-logo {
-  position: fixed;
-  top: calc(24% - 96px);
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 28px;
-  border: 2px solid rgba(255,255,255,0.35);
-  z-index: 600;
-  pointer-events: none;
-  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.4));
-}
 
 /* ── MOST RECENT CHAT (words only, under the clock) ── */
 .boot-ready #most-recent-chat { animation: paneFade 0.55s ease 0.3s both; }
