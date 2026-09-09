@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chudoogle-scramjet
+    runtime: node
+    plan: free
+    buildCommand: npm ci --ignore-scripts
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

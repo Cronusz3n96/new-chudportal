@@ -1,0 +1,41 @@
+# ── secrets & credentials ──
+.wrangler/
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+*.log
+
+# ── caches / local config ──
+.config/
+.opencode/
+.cache/
+.local/
+.npm/
+.docker/
+.cursor/
+.python/
+
+# ── home dotfiles ──
+.bashrc
+.bash_profile
+.bash_history
+.bash_logout
+.profile
+.sommelierrc
+.Xauthority
+.sudo_as_admin_successful
+
+# ── node / build ──
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+
+# ── carried over from gitignore.txt ──
+.downloads/
+**/proxy-bootstrap/**/.downloads/
+
+# ── backups (large duplicates of tracked folders) ──
+scramjet-proxy.zip
