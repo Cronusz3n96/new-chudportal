@@ -6070,7 +6070,7 @@ footer p::before {
     if(!inp||!inp.value.trim()) return;
     showBrowser(inp.value.trim());
   };
-  window.proxyNav = function(url){ showBrowser(url); };
+  window.proxyNav = function(url){ window._openProxiedApp(url); };
   window.proxyReload = async function(){
     if(!lastTarget) return;
     try {
