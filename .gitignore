@@ -39,3 +39,5 @@ yarn-error.log*
 
 # ── backups (large duplicates of tracked folders) ──
 scramjet-proxy.zip
+# local draft app (keep off the repo)
+chudai-draft/
