@@ -5937,7 +5937,7 @@ footer p::before {
     var value = (raw||'').trim();
     if(!value) throw new Error('Type something to search or visit.');
     if(looksLikeUrl(value)) return /^https?:\/\//i.test(value) ? value : ('https://' + value);
-    return 'https://www.google.com/search?q=' + encodeURIComponent(value);
+    return 'https://www.google.com/search?q=' + encodeURIComponent(value) + '&hl=en&gl=US&num=20';
   }
 
   function canUseScramjet(){
