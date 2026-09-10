@@ -11,8 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY server.js ./
+COPY server.js bootstrap-init.js sw.js ./
 COPY public ./public
+COPY scram ./scram
+COPY controller ./controller
+COPY clients ./clients
 
 ENV NODE_ENV=production
 ENV PORT=3030
