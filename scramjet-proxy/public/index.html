@@ -6149,57 +6149,36 @@ footer p::before {
   font-size: 1rem; font-weight: 600;
   color: var(--light-text);
   letter-spacing: normal;
-  display: flex; align-items: center; gap: 8px;
 }
 #ai-section .ai-brand-name span { color: var(--primary-orange); }
-#ai-section .ai-brand-name::before {
-  content: '';
-  width: 22px; height: 22px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-orange), rgba(var(--primary-orange-rgb), 0.35));
-  flex-shrink: 0;
-}
-#ai-section #notice {
-  display: none;
-}
+#ai-section #notice { display: none; }
 #ai-section #chat {
-  flex: 1; padding: 24px 16px;
+  flex: 1; padding: 20px 16px;
   overflow-y: auto;
-  max-width: 760px; width: 100%; margin: 0 auto;
+  max-width: 820px; width: 100%; margin: 0 auto;
   box-sizing: border-box;
 }
 #ai-section #chat::-webkit-scrollbar { width: 6px; }
 #ai-section #chat::-webkit-scrollbar-thumb { background: var(--gray-text); border-radius: 3px; }
 #ai-section .message {
   max-width: 100%;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: 0.97rem;
+  line-height: 1.75;
   word-wrap: break-word;
-  padding: 4px 0;
+  padding: 2px 0;
+  border: none !important;
+  background: none !important;
 }
-#ai-section .user {
-  align-self: flex-end;
-  background: rgba(var(--primary-orange-rgb), 0.14);
-  border: 1px solid rgba(var(--primary-orange-rgb), 0.25);
-  border-radius: 18px 18px 4px 18px;
-  padding: 10px 14px;
-  max-width: 72%;
-}
-#ai-section .user-label { display: none; }
-#ai-section .bot {
-  align-self: flex-start;
-  background: transparent;
-  border: none;
-  max-width: 100%;
-  color: var(--light-text);
-}
-#ai-section .bot-label {
-  font-size: 0.72rem;
-  font-weight: 600;
+#ai-section .message.user {
+  text-align: right;
   color: var(--gray-text);
-  margin-bottom: 4px;
-  text-transform: none;
-  letter-spacing: normal;
 }
+#ai-section .message.bot {
+  text-align: left;
+}
+#ai-section .user { align-self: flex-end; }
+#ai-section .bot { align-self: flex-start; }
+#ai-section .user-label, #ai-section .bot-label { display: none; }
 #ai-section .bot pre {
   background: #141414;
   color: var(--light-text);
@@ -6209,26 +6188,57 @@ footer p::before {
   font-family: 'Courier New', monospace;
   margin-top: 8px;
   border: 1px solid rgba(var(--primary-orange-rgb), 0.15);
-  font-size: 0.84rem;
+  font-size: 0.86rem;
+  text-align: left;
 }
 #ai-section .bot code { white-space: pre-wrap; }
+/* copy button */
+#ai-section .message.bot { position: relative; }
+#ai-section .copy-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--gray-text);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin: 4px 0 0;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+#ai-section .copy-btn:hover { opacity: 1; color: var(--light-text); }
+/* share offer button */
+#ai-section .share-offer-btn {
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(var(--primary-orange-rgb), 0.1);
+  border: 1px solid rgba(var(--primary-orange-rgb), 0.35);
+  color: var(--light-text);
+  font-size: 0.82rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.15s ease;
+}
+#ai-section .share-offer-btn:hover { background: rgba(var(--primary-orange-rgb), 0.2); }
 #ai-section #form {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px 8px 16px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px;
   border-top: 1px solid rgba(var(--primary-orange-rgb), 0.12);
   background: rgba(10,10,10,0.85);
   flex-shrink: 0;
-  max-width: 760px; width: 100%; margin: 0 auto;
+  max-width: 820px; width: 100%; margin: 0 auto;
   box-sizing: border-box;
 }
 #ai-section #input {
   flex: 1;
   background: transparent;
   border: none;
-  border-radius: 0;
   color: var(--light-text);
-  font-size: 0.95rem;
-  padding: 10px 0;
+  font-size: 0.97rem;
+  padding: 8px 0;
   outline: none;
 }
 #ai-section #input:focus { border: none; background: transparent; }
@@ -6246,9 +6256,7 @@ footer p::before {
   padding: 0;
 }
 #ai-section #send::before { content: '\2191'; font-weight: bold; }
-#ai-section #send:hover:not(:disabled) {
-  background: rgba(var(--primary-orange-rgb), 0.45);
-}
+#ai-section #send:hover:not(:disabled) { background: rgba(var(--primary-orange-rgb), 0.45); }
 #ai-section #send:disabled { opacity: 0.35; cursor: not-allowed; }
 .ai-back-btn {
   display: flex; align-items: center; gap: 6px;
@@ -13735,15 +13743,19 @@ window.blobPadge=function(url){
 	</script> 
 <script>
 // AI chat
-  (function(){
+(function(){
     const chatEl = document.getElementById('chat');
-    const statusEl = document.getElementById('status');
     const inputEl = document.getElementById('input');
     const sendBtn = document.getElementById('send');
     if (!chatEl || !inputEl || !sendBtn) return;
     const API_URL = (window.__AI_URL && window.__AI_URL.trim()) ? window.__AI_URL : '/api/chat';
     let history = [];
     let busy = false;
+    let sharing = false;
+    let shareStream = null;
+    let frameTimer = null;
+    let lastShot = null;
+    let shareBtn = null;
 
     function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function renderMarkdown(el, txt){
@@ -13758,10 +13770,6 @@ window.blobPadge=function(url){
     function addMessage(text, who){
       const m = document.createElement('div');
       m.className = 'message ' + (who === 'user' ? 'user' : 'bot');
-      const label = document.createElement('div');
-      label.className = (who === 'user' ? 'user-label' : 'bot-label');
-      label.textContent = who === 'user' ? 'You' : 'Chud AI';
-      m.appendChild(label);
       const body = document.createElement('div');
       body.className = 'ai-msg-body';
       renderMarkdown(body, text);
@@ -13770,23 +13778,101 @@ window.blobPadge=function(url){
       chatEl.scrollTop = chatEl.scrollHeight;
       return m;
     }
-    function setStatus(t){
-      if (!statusEl) return;
-      statusEl.textContent = t;
-      statusEl.className = (t === 'Online') ? 'connected' : (t === 'Offline' ? 'error' : '');
+    function addCopyButton(bubble, text){
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.title = 'Copy answer';
+      btn.innerHTML = 'Copy';
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        navigator.clipboard.writeText(text.replace(/\[SHARE_SCREEN\]/g, '').trim()).then(function(){
+          const old = btn.innerHTML;
+          btn.innerHTML = 'Copied';
+          setTimeout(function(){ btn.innerHTML = old; }, 1400);
+        }).catch(function(){});
+      });
+      bubble.appendChild(btn);
     }
+    function addShareOffer(){
+      if (shareBtn) return;
+      shareBtn = document.createElement('button');
+      shareBtn.className = 'share-offer-btn';
+      shareBtn.innerHTML = '📺 Share screen so Chud AI can see';
+      shareBtn.addEventListener('click', async function(){
+        shareBtn.innerHTML = 'Requesting screen...';
+        const ok = await startShare();
+        shareBtn.remove();
+        shareBtn = null;
+        if (ok) {
+          await sendWithText('Sharing my screen now. Can you see what I should do next?');
+        }
+      });
+      chatEl.appendChild(shareBtn);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+    function stopShare(){
+      if (frameTimer) { clearInterval(frameTimer); frameTimer = null; }
+      if (shareStream) { shareStream.getTracks().forEach(function(t){ t.stop(); }); shareStream = null; }
+      sharing = false;
+      lastShot = null;
+    }
+    async function startShare(){
+      if (sharing) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) return false;
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        shareStream = stream;
+        sharing = true;
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.srcObject = stream;
+        await video.play();
+        const grab = async function(){
+          try {
+            if (!sharing || video.readyState < 2) return;
+            const cw = 960;
+            const ch = Math.round((video.videoHeight || cw) * cw / (video.videoWidth || cw));
+            const cv = document.createElement('canvas');
+            cv.width = cw; cv.height = ch;
+            cv.getContext('2d').drawImage(video, 0, 0, cw, ch);
+            lastShot = cv.toDataURL('image/jpeg', 0.7).split(',')[1];
+          } catch (e) {}
+        };
+        await grab();
+        frameTimer = setInterval(grab, 1600);
+        stream.getVideoTracks()[0].addEventListener('ended', stopShare);
+        return true;
+      } catch (e) { return false; }
+    }
+
+    function setStatus(t){ /* removed status element */}
     function setBusy(b){
       busy = b;
       sendBtn.disabled = b;
       inputEl.disabled = b;
       if (!b) inputEl.focus();
     }
+    async function sendWithText(text, image){
+      if (busy) return;
+      if (!image && sharing) image = lastShot;
+      await renderQuestionAndExecute(text, image);
+    }
     async function send(){
       const q = inputEl.value.trim();
       if (!q || busy) return;
+      inputEl.value = '';
       addMessage(q, 'user');
       history.push({ role: 'user', content: q });
-      inputEl.value = '';
+      const image = sharing ? lastShot : null;
+      await execute(image);
+    }
+    async function renderQuestionAndExecute(text, image){
+      addMessage(text, 'user');
+      history.push({ role: 'user', content: text });
+      await execute(image);
+    }
+    async function execute(image){
       setBusy(true);
       const bubble = addMessage('', 'bot');
       let txt = '';
@@ -13794,7 +13880,7 @@ window.blobPadge=function(url){
         const resp = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history }),
+          body: JSON.stringify({ messages: history, image: image || null }),
         });
         const data = await resp.json();
         if (resp.ok && data.reply) txt = data.reply;
@@ -13802,14 +13888,19 @@ window.blobPadge=function(url){
       } catch (err) {
         txt = '⚠ ' + String(err && err.message || err);
       }
-      renderMarkdown(bubble.querySelector('.ai-msg-body'), txt);
-      history.push({ role: 'assistant', content: txt });
+      const clean = txt.replace(/\[SHARE_SCREEN\]/g, '');
+      const wantsShare = /\b(share your screen|share screen|let me see your screen|show me your screen)\b/i.test(txt) || txt.indexOf('SHARE_SCREEN') !== -1;
+      renderMarkdown(bubble.querySelector('.ai-msg-body'), clean);
+      addCopyButton(bubble, clean);
+      if (wantsShare) addShareOffer();
+      const ref = lastShot;
+      history.push({ role: 'assistant', content: clean });
       setBusy(false);
+      if (sharing && ref) lastShot = ref;
     }
     sendBtn.addEventListener('click', send);
     inputEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') send(); });
     setBusy(false);
-    setStatus('Online');
   })();
 
     function cineosFullscreen() {
