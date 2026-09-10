@@ -6125,6 +6125,7 @@ footer p::before {
   color: #fff;
   overflow: hidden;
   font-family: 'Courier New', Courier, monospace;
+  flex-direction: column;
 }
 .app-tab-panel #ai-section { position: relative !important; height: 100% !important; min-height: calc(100vh - 60px) !important; }
 #chat {
@@ -6148,18 +6149,19 @@ footer p::before {
   background: none !important;
   user-select: text;
   -webkit-user-select: text;
+  color: #fff;
 }
 .message.user {
   align-self: flex-end;
-  color: #f0f0f0;
+  color: #fff;
 }
 .message.bot {
   align-self: flex-start;
-  color: #49e86b;
+  color: #fff;
 }
 .bot pre {
   background: #0a0a0a;
-  color: #49e86b;
+  color: #fff;
   padding: 10px 12px;
   border: 1px solid #1c1c1c;
   border-radius: 2px;
@@ -6176,12 +6178,12 @@ footer p::before {
   align-items: center;
   gap: 8px;
   padding: 12px 14px;
-  border-top: 1px solid #101010;
+  border-top: 1px solid #1a1a1a;
   background: #000;
   flex-shrink: 0;
 }
 .ai-prompt {
-  color: #49e86b;
+  color: #fff;
   font-weight: bold;
   font-size: 1rem;
 }
@@ -6194,14 +6196,14 @@ footer p::before {
   font-size: 0.96rem;
   padding: 4px 0;
   outline: none;
-  caret-color: #49e86b;
+  caret-color: #fff;
 }
 #input:disabled { opacity: 0.45; }
 #input::placeholder { color: #555; }
 #send {
   background: transparent;
-  color: #49e86b;
-  border: 1px solid #49e86b;
+  color: #fff;
+  border: 1px solid #333;
   border-radius: 2px;
   font-size: 0.9rem;
   font-family: 'Courier New', Courier, monospace;
@@ -6210,22 +6212,22 @@ footer p::before {
   flex-shrink: 0;
   transition: all 0.2s;
 }
-#send:hover:not(:disabled) { background: rgba(73,232,107,0.15); }
+#send:hover:not(:disabled) { color: #fff; border-color: #fff; }
 #send:disabled { opacity: 0.35; cursor: not-allowed; }
 .ai-back-btn {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
-  background: transparent;
+  background: #000;
   border: none;
-  color: #888;
+  color: #fff;
   font-family: 'Courier New', Courier, monospace;
   font-size: 1.3rem;
   padding: 4px 12px;
   cursor: pointer;
 }
-.ai-back-btn:hover { color: #49e86b; }
+.ai-back-btn:hover { color: #fff; }
 
 /* Dock tooltips handled by JS */
 /* Also ensure home-dock-btn tooltip works the same way */
@@ -8157,7 +8159,7 @@ const blobpadgerSection=document.getElementById('blobpadger-section')
         },80)
       } else if (tab === 'ai') {
         aiTab.classList.add('active');
-        aiSection.style.display = 'block';
+        aiSection.style.display = 'flex';
         // Full-page AI: hide dock and OS chrome
         if (osDock) osDock.style.display = 'none';
         if (backBtn) backBtn.classList.remove('visible');
@@ -13703,17 +13705,9 @@ window.blobPadge=function(url){
       txt = txt.replace(/\n/g, '<br>');
       el.innerHTML = txt || '&nbsp;';
     }
-    let firstMsg = true;
     function addMessage(text, who){
       const m = document.createElement('div');
       m.className = 'message ' + (who === 'user' ? 'user' : 'bot');
-      if (who === 'bot') {
-        const corner = document.createElement('span');
-        corner.className = 'corner';
-        corner.innerHTML = firstMsg ? '&#9632; system ready' : '&#9632;';
-        m.appendChild(corner);
-        firstMsg = false;
-      }
       const body = document.createElement('div');
       renderMarkdown(body, text);
       m.appendChild(body);
