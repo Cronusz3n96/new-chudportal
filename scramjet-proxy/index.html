@@ -186,17 +186,6 @@ const CHUD_LOGO = "https://cdn.jsdelivr.net/gh/Cronusz3n96/hhbbhbh@main/logo.png
 }
 #chudjack-bg.active { opacity: 1; }
 
-#justrunmy-bg {
-  position: fixed; inset: 0;
-  background-image: url('/justrunmy-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0; pointer-events: none; z-index: 0;
-  transition: opacity 0.4s ease;
-}
-#justrunmy-bg.active { opacity: 1; }
-
 
 	  .container.slide-down {
        transform: translateY(100%)
@@ -5306,7 +5295,7 @@ footer p::before {
 
 
 
-	 <div id="background-root"><div id="baja-bg"></div><div id="mountains-bg"></div><div id="medium-bg"></div><div id="brotato-bg"></div><div id="chudowl-bg"></div><div id="chudjack-bg"></div><div id="justrunmy-bg"></div></div>
+	 <div id="background-root"><div id="baja-bg"></div><div id="mountains-bg"></div><div id="medium-bg"></div><div id="brotato-bg"></div><div id="chudowl-bg"></div><div id="chudjack-bg"></div></div>
   <div class="container" id="main-container">
 
     <header style="display:none">
@@ -6546,7 +6535,6 @@ footer p::before {
           <button class="background-option" data-background="brotato" onclick="setBackgroundStyle('brotato')">Brotato</button>
           <button class="background-option" data-background="chudowl" onclick="setBackgroundStyle('chudowl')">Chudowl</button>
           <button class="background-option" data-background="chudjack" onclick="setBackgroundStyle('chudjack')">Chain Layer 2</button>
-          <button class="background-option" data-background="justrunmy" onclick="setBackgroundStyle('justrunmy')">Honestly</button>
         </div>
       </div>
       <div class="setting-item setting-cursor" style="border:none;padding:0;">
@@ -7538,7 +7526,7 @@ alert('Unable to download this title. Try another one or use the main site to do
     }
 
 	function normalizeBackgroundStyle(style) {
-	   const allowed = ['baja', 'mountains', 'medium', 'brotato', 'chudowl', 'chudjack', 'justrunmy'];  
+	   const allowed = ['baja', 'mountains', 'medium', 'brotato', 'chudowl', 'chudjack'];  
 	    return allowed.includes(style) ? style : 'matrix';
 	 }
 
@@ -7960,8 +7948,6 @@ alert('Unable to download this title. Try another one or use the main site to do
       if (chudowlBg) chudowlBg.classList.toggle('active', nextStyle === 'chudowl');
       const chudjackBg = document.getElementById('chudjack-bg');
       if (chudjackBg) chudjackBg.classList.toggle('active', nextStyle === 'chudjack');
-      const justrunmyBg = document.getElementById('justrunmy-bg');
-      if (justrunmyBg) justrunmyBg.classList.toggle('active', nextStyle === 'justrunmy');
       const homeSearchEl = document.getElementById('chud-home-search');
       if (homeSearchEl) homeSearchEl.setAttribute('data-bg', nextStyle);
 
@@ -7981,7 +7967,7 @@ alert('Unable to download this title. Try another one or use the main site to do
         } else if (nextStyle === 'constellation') {   
           initConstellationNodes(); 
 	         startBackgroundLoop();
-        } else if (nextStyle === 'baja' || nextStyle === 'mountains' || nextStyle === 'medium' || nextStyle === 'brotato' || nextStyle === 'chudowl' || nextStyle === 'chudjack' || nextStyle === 'justrunmy') {
+        } else if (nextStyle === 'baja' || nextStyle === 'mountains' || nextStyle === 'medium' || nextStyle === 'brotato' || nextStyle === 'chudowl' || nextStyle === 'chudjack') {
              stopBackgroundLoop(); clearBackgroundCanvas();  
         } else {
 	         startBackgroundLoop(); 
@@ -15541,6 +15527,7 @@ document.addEventListener('click', function(e) {
   var BG_LIST = [
     {id:'baja',      name:'Baja Blast',  img:'https://cdn.jsdelivr.net/gh/Cronusz3n96/hhbbhbh@main/baja-blast-bg.webp'},
     {id:'brotato',   name:'Brotato',     img:'https://raw.githubusercontent.com/Cronusz3n96/hhbbhbh/main/3952.jpg'},
+    {id:'chudjack',  name:'Chain Layer 2', img:'/chudjack-bg.jpg'},
   ];
 
   // Tab
