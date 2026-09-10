@@ -6180,6 +6180,12 @@ footer p::before {
   text-align: right;
   color: #fff;
 }
+#ai-section .message, #ai-section .ai-msg-body, #ai-section .bot pre {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
 #ai-section .message.bot {
   text-align: left;
   color: #4ade80;
@@ -13839,6 +13845,32 @@ window.blobPadge=function(url){
       sharing = false;
       lastShot = null;
     }
+    function captureFrame(video){
+      try {
+        if (!sharing || !video || video.readyState < 2 || !video.videoWidth) return null;
+        const cw = 960;
+        const ch = Math.round((video.videoHeight || cw) * cw / (video.videoWidth || cw));
+        const cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        cv.getContext('2d').drawImage(video, 0, 0, cw, ch);
+        const b64 = cv.toDataURL('image/jpeg', 0.7).split(',')[1];
+        lastShot = b64;
+        return b64;
+      } catch (e) { return null; }
+    }
+    function ensureFrame(){
+      return new Promise(function(resolve){
+        if (!sharing || !shareStream || !shareStream.getVideoTracks().length) { resolve(lastShot); return; }
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.srcObject = shareStream;
+        video.onloadedmetadata = function(){ video.play().then(function(){ resolve(captureFrame(video)); }).catch(function(){ resolve(lastShot); }); };
+        video.play().catch(function(){ resolve(lastShot); });
+        captureFrame(video);
+        setTimeout(function(){ resolve(lastShot); }, 600);
+      });
+    }
     async function startShare(){
       if (sharing) return true;
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) return false;
@@ -13852,20 +13884,14 @@ window.blobPadge=function(url){
         video.srcObject = stream;
         await video.play();
         const grab = async function(){
-          try {
-            if (!sharing || video.readyState < 2) return;
-            const cw = 960;
-            const ch = Math.round((video.videoHeight || cw) * cw / (video.videoWidth || cw));
-            const cv = document.createElement('canvas');
-            cv.width = cw; cv.height = ch;
-            cv.getContext('2d').drawImage(video, 0, 0, cw, ch);
-            lastShot = cv.toDataURL('image/jpeg', 0.7).split(',')[1];
-          } catch (e) {}
+          const b64 = captureFrame(video);
+          if (b64) lastShot = b64;
         };
         await grab();
-        frameTimer = setInterval(grab, 1600);
+        frameTimer = setInterval(grab, 1200);
         stream.getVideoTracks()[0].addEventListener('ended', stopShare);
-        return true;
+        if (!lastShot) await grab();
+        return !!lastShot;
       } catch (e) { return false; }
     }
 
@@ -13878,7 +13904,7 @@ window.blobPadge=function(url){
     }
     async function sendWithText(text, image){
       if (busy) return;
-      if (!image && sharing) image = lastShot;
+      if (!image && sharing) image = await ensureFrame();
       await renderQuestionAndExecute(text, image);
     }
     async function send(){
@@ -13887,7 +13913,7 @@ window.blobPadge=function(url){
       inputEl.value = '';
       addMessage(q, 'user');
       history.push({ role: 'user', content: q });
-      const image = sharing ? lastShot : null;
+      const image = sharing ? await ensureFrame() : null;
       await execute(image);
     }
     async function renderQuestionAndExecute(text, image){
