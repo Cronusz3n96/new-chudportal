@@ -15,25 +15,27 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 const SELF_HOSTED = process.env.SELF_HOSTED === "1";
-const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || "";
+const WISP_HOST = process.env.WISP_HOST || "";
 
 if (SELF_HOSTED) {
-  const selfHost = RENDER_URL ? RENDER_URL.replace(/^https?:\/\//, "") : (process.env.WISP_HOST || "");
-  if (selfHost) {
-    const target = `window.__WISP_HOST='${selfHost}'`;
-    app.use((req, res, next) => {
-      if (req.path === "/" || req.path === "/index.html") {
-        const send = res.send.bind(res);
-        res.send = (chunk) => {
-          if (typeof chunk === "string" && chunk.includes("__WISP_HOST")) {
-            chunk = chunk.replace(/window\.__WISP_HOST='[^']*'/, target);
-          }
-          return send(chunk);
-        };
-      }
-      next();
-    });
-  }
+  app.get(["/", "/index.html"], async (req, res, next) => {
+    const host = req.get("host") || WISP_HOST;
+    if (!host) { next(); return; }
+    const target = `window.__WISP_HOST='${host}'`;
+    const candidates = ["index.html", "public/index.html"];
+    for (const file of candidates) {
+      try {
+        const abs = new URL(`./${file}`, import.meta.url);
+        let html = await (await import("node:fs/promises")).readFile(abs, "utf8");
+        if (html.includes("__WISP_HOST")) {
+          html = html.replace(/window\.__WISP_HOST='[^']*'/, target);
+        }
+        res.type("html").send(html);
+        return;
+      } catch (e) { /* try next */ }
+    }
+    next();
+  });
 }
 
 const AI_BACKEND = "https://chudjakbrutalcell.merrittjake65.workers.dev/api/chat";
