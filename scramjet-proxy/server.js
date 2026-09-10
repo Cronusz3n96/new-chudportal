@@ -14,6 +14,28 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 
+const SELF_HOSTED = process.env.SELF_HOSTED === "1";
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || "";
+
+if (SELF_HOSTED) {
+  const selfHost = RENDER_URL ? RENDER_URL.replace(/^https?:\/\//, "") : (process.env.WISP_HOST || "");
+  if (selfHost) {
+    const target = `window.__WISP_HOST='${selfHost}'`;
+    app.use((req, res, next) => {
+      if (req.path === "/" || req.path === "/index.html") {
+        const send = res.send.bind(res);
+        res.send = (chunk) => {
+          if (typeof chunk === "string" && chunk.includes("__WISP_HOST")) {
+            chunk = chunk.replace(/window\.__WISP_HOST='[^']*'/, target);
+          }
+          return send(chunk);
+        };
+      }
+      next();
+    });
+  }
+}
+
 const AI_BACKEND = "https://chudjakbrutalcell.merrittjake65.workers.dev/api/chat";
 
 app.post("/api/chat", async (req, res) => {
