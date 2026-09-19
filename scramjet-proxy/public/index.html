@@ -14962,14 +14962,46 @@ document.addEventListener('click', function(e) {
   const SB_KEY = 'sb_publishable_-ctB70kQmKV6XE6-wy-l4w_8xr456d0';
   const HISTORY_LIMIT = 40;
 
+  const CHAT_COOLDOWN = 3000;
+  let lastSendTime = 0;
+
+  const SLURS = [
+    /nigg[aer]{1,3}/i,
+    /\bkike\b/i,
+    /\bfag(?:gots?|ots?)?\b/i,
+    /\bdykes?\b/i,
+    /\btrann(?:y|ie|ies)\b/i,
+    /\bspic[ks]?\b/i,
+    /\bwetbacks?\b/i,
+    /\beaners?\b/i,
+    /\bchinks?\b/i,
+    /\bgooks?\b/i,
+    /\bjaps?\b/i,
+    /\bnips?\b/i,
+    /\bpaki\w*\b/i,
+    /\bcoons?\b/i,
+    /\bredskins?\b/i,
+    /\bcrackers?\b/i,
+    /\bhonk(?:ey|ie|y)s?\b/i,
+    /\bsambos?\b/i,
+    /\bporch\s*monkeys?\b/i,
+    /\btowel\s*heads?\b/i,
+    /\bragheads?\b/i,
+    /\bretard(?:ed|s)?\b/i,
+    /\bmongoloids?\b/i,
+    /\bcunts?\b/i,
+  ];
+
   const BANNED_SEND = [
     /jacob\s*taylor\s*merritt/i,/jake\s*merritt/i,/jakub\s*merritt/i,
     /j\.?\s*merritt/i,/575[\s\-\.]?285[\s\-\.]?7206/,/5752857206/,/jacob\s*merritt/i,
+    /\bmerritt\b/i,/\bjacob\b/i,/\bjakub\b/i,
+    ...SLURS,
   ];
-  const BANNED_NAME = [/jacob/i,/merritt/i,/jakub/i,/jake\s*m/i,/575285/];
+  const BANNED_NAME = [/jacob/i,/merritt/i,/jakub/i,/jake\s*m/i,/575285/,...SLURS];
 
   // Patterns to strip from input as typed
-  const STRIP_WORDS = /jake|jacob|jakub|merritt/gi;
+  const STRIP_WORDS = /jake\b|jacob|jakub|merritt|nigg[aer]{1,3}|\bfag(?:gots?|ots?)?\b|\bdykes?\b|\btrann(?:y|ie|ies)\b|\bspic[ks]?\b|\bwetbacks?\b|\beaners?\b|\bchinks?\b|\bgooks?\b|\bjaps?\b|\bnips?\b|\bpaki\w*\b|\bcoons?\b|\bredskins?\b|\bcrackers?\b|\bhonk(?:ey|ie|y)s?\b|\bsambos?\b|\bporch\s*monkeys?\b|\btowel\s*heads?\b|\bragheads?\b|\bretard(?:ed|s)?\b|\bmongoloids?\b|\bcunts?\b|\bkike\b/gi;
 
   function containsBanned(t){return BANNED_SEND.some(p=>p.test(t));}
   function nameBanned(t){return BANNED_NAME.some(p=>p.test(t));}
@@ -15147,6 +15179,9 @@ document.addEventListener('click', function(e) {
     if(!text)return;
     if(hasNumbers(text)){showToast('NO NUMBERS IN MESSAGES');msgInput.value='';return;}
     if(containsBanned(text)){showToast('MESSAGE CONTAINS BANNED CONTENT');msgInput.value='';return;}
+    const now=Date.now();
+    if(now-lastSendTime<CHAT_COOLDOWN){showToast('SLOW DOWN — '+(Math.ceil((lastSendTime+CHAT_COOLDOWN-now)/1000))+'s');return;}
+    lastSendTime=now;
     sendBtn.disabled=true;msgInput.disabled=true;
     if(activeDm){
       const{data,error}=await sb.from('dms').insert({sender:username,recipient:activeDm,text}).select().single();
