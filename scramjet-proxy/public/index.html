@@ -6712,6 +6712,7 @@ footer p::before {
       }
     })();
   </script>
+  <script src="gnmath-games.js"></script>
 
     <script>
 
@@ -14965,6 +14966,68 @@ document.addEventListener('click', function(e) {
   const CHAT_COOLDOWN = 3000;
   let lastSendTime = 0;
 
+  // ── TIMEOUT SYSTEM ──
+  // Go against the rules 5+ times and you're locked out for an hour (escalating).
+  const TIMEOUT_VIOLATION_LIMIT = 5;
+  const TIMEOUT_DURATIONS = [60*60*1000, 12*60*60*1000, 24*60*60*1000];
+  const VIO_KEY='chud-vio-count';
+  const TO_KEY='chud-timeout-until';
+  const TO_LEVEL_KEY='chud-timeout-level';
+
+  function readStored(k,f){try{const v=localStorage.getItem(k);return v?f(v):0;}catch(e){return 0;}}
+  function writeStored(k,v){try{localStorage.setItem(k,String(v));}catch(e){}}
+  function violationCount(){return readStored(VIO_KEY,Number);}
+  function timeoutUntil(){return readStored(TO_KEY,Number);}
+  function timeoutLevel(){return Math.max(0,readStored(TO_LEVEL_KEY,Number)-1);}
+  function timedOutMs(){
+    const until=timeoutUntil();
+    if(!until)return 0;
+    return Math.max(0,until-Date.now());
+  }
+  function isTimedOut(){return timedOutMs()>0;}
+  function fmtTimeout(ms){
+    const s=Math.ceil(ms/1000);
+    const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+    return (h?h+'h':'')+(m?' '+m+'m':'')+(h||m?' ':'')+(h?sec+'s':m?'':' '+sec+'s');
+  }
+  function violationCount(){return readStored(VIO_KEY,Number);}
+  function timeoutLevel(){return Math.max(0,readStored(TO_LEVEL_KEY,Number)-1);}
+  function recordViolation(){
+    if(isTimedOut())return;
+    const n=Math.min(violationCount()+1,TIMEOUT_VIOLATION_LIMIT);
+    writeStored(VIO_KEY,n);
+    if(n>=TIMEOUT_VIOLATION_LIMIT){
+      const dur=TIMEOUT_DURATIONS[Math.min(timeoutLevel(),TIMEOUT_DURATIONS.length-1)];
+      writeStored(TO_KEY,Date.now()+dur);
+      writeStored(TO_LEVEL_KEY,(timeoutLevel()+2));
+      writeStored(VIO_KEY,0);
+      showToast('⛔ TIMED OUT — '+fmtTimeout(dur));
+      applyTimeoutLock();
+    } else {
+      showToast('⚠ RULE VIOLATION '+(TIMEOUT_VIOLATION_LIMIT-n)+' LEFT');
+    }
+  }
+  function applyTimeoutLock(){
+    if(!isTimedOut()){
+      nameInput.disabled=false;joinBtn.disabled=false;joinBtn.textContent='Join';
+      msgInput.disabled=!joined;msgInput.placeholder=joined?'say something...':'join to chat...';
+      sendBtn.disabled=!joined;return;
+    }
+    nameInput.disabled=true;msgInput.disabled=true;sendBtn.disabled=true;
+    msgInput.placeholder='TIMED OUT — '+fmtTimeout(timedOutMs());
+    showToast('⛔ TIMED OUT — '+fmtTimeout(timedOutMs()));
+  }
+  const TO_MINUTE=60*1000;
+  setInterval(()=>{
+    if(isTimedOut()){
+      const ms=timedOutMs();
+      if(ms>0){msgInput.placeholder='TIMED OUT — '+fmtTimeout(ms);msgInput.disabled=true;sendBtn.disabled=true;}
+    } else {
+      msgInput.placeholder=joined?'say something...':'join to chat...';
+      if(joined){msgInput.disabled=false;sendBtn.disabled=false;}
+    }
+  },TO_MINUTE);
+
   const SLURS = [
     /nigg[aer]{1,3}/i,
     /\bkike\b/i,
@@ -15153,8 +15216,8 @@ document.addEventListener('click', function(e) {
   async function handleJoin(){
     const raw=nameInput.value.trim();
     if(!raw){showToast('ENTER A USERNAME');return;}
-    if(hasNumbers(raw)){showToast('NO NUMBERS IN USERNAME');nameInput.value='';return;}
-    if(nameBanned(raw)||containsBanned(raw)){showToast('USERNAME BANNED');nameInput.value='';return;}
+    if(hasNumbers(raw)){recordViolation();showToast('NO NUMBERS IN USERNAME');nameInput.value='';return;}
+    if(nameBanned(raw)||containsBanned(raw)){recordViolation();showToast('USERNAME BANNED');nameInput.value='';return;}
     if(raw.length<2){showToast('USERNAME TOO SHORT');return;}
     joinBtn.disabled=true;joinBtn.textContent='Joining...';
     username=raw;
@@ -15177,8 +15240,8 @@ document.addEventListener('click', function(e) {
     if(!joined)return;
     const text=msgInput.value.trim();
     if(!text)return;
-    if(hasNumbers(text)){showToast('NO NUMBERS IN MESSAGES');msgInput.value='';return;}
-    if(containsBanned(text)){showToast('MESSAGE CONTAINS BANNED CONTENT');msgInput.value='';return;}
+    if(hasNumbers(text)){recordViolation();showToast('NO NUMBERS IN MESSAGES');msgInput.value='';return;}
+    if(containsBanned(text)){recordViolation();showToast('MESSAGE CONTAINS BANNED CONTENT');msgInput.value='';return;}
     const now=Date.now();
     if(now-lastSendTime<CHAT_COOLDOWN){showToast('SLOW DOWN — '+(Math.ceil((lastSendTime+CHAT_COOLDOWN-now)/1000))+'s');return;}
     lastSendTime=now;
