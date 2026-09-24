@@ -26,6 +26,8 @@
   window.switchView = switchView;
 
   /* ── Cards ── */
+  var TAPES = ['HOT!', 'NEW!', 'GOOD', 'SICK', 'W', 'POG'];
+
   function fallbackName(g) {
     var t = g.title || '?';
     return t.charAt(0).toUpperCase();
@@ -40,7 +42,10 @@
     var thumb = document.createElement('div');
     thumb.className = 'card-thumb';
     var imgHtml = g.image ? '<img loading="lazy" src="' + g.image + '" alt="" onerror="this.style.display=\'none\'">' : '';
-    thumb.innerHTML = imgHtml + '<span class="fallback">' + fallbackName(g) + '</span><span class="play-hint">&#9654;</span>';
+    thumb.innerHTML = imgHtml +
+      '<span class="fallback">' + fallbackName(g) + '</span>' +
+      '<span class="tape t' + (i % 6) + '">' + TAPES[i % TAPES.length] + '</span>' +
+      '<span class="play-hint"></span>';
 
     var body = document.createElement('div');
     body.className = 'card-body';
@@ -252,6 +257,25 @@
       closeBrowser();
     }
   });
+
+  /* ── smiley logo easter egg ── */
+  var JOKES = ['ow!!', 'hehe', 'stop that', 'u found the button', 'nice', '*static*', 'boop', 'get back to the games', '10/10 click', 'wow so cool'];
+  var brand = $('brand');
+  if (brand) {
+    brand.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      var j = $('joke');
+      j.textContent = '< ' + JOKES[Math.floor(Math.random() * JOKES.length)] + ' ...';
+      j.hidden = false;
+      clearTimeout(j._t);
+      j._t = setTimeout(function () { j.hidden = true; }, 1100);
+    });
+  }
+
+  /* ── back to top ── */
+  window.addEventListener('scroll', function () {
+    $('totop').hidden = window.scrollY < 320;
+  }, { passive: true });
 
   /* ── Boot ── */
   renderHome();

@@ -20,18 +20,12 @@
 
   <div class="rainbow" aria-hidden="true"></div>
 
-  <div class="ticker" aria-hidden="true">
-    <div class="ticker-inner">
-      <span>⭐ CHUD HOME ⭐ FREE GAMES ⭐ SECRET PROXY ⭐ MADE IN STUDY HALL ⭐ NO DOWNLOADS ⭐ CAN'T GET BLOCKED ⭐&nbsp;</span>
-      <span>⭐ CHUD HOME ⭐ FREE GAMES ⭐ SECRET PROXY ⭐ MADE IN STUDY HALL ⭐ NO DOWNLOADS ⭐ CAN'T GET BLOCKED ⭐&nbsp;</span>
-    </div>
-  </div>
-
   <header class="nav">
-    <a class="nav-brand" href="#home" onclick="switchView('home');return false;">
+    <a class="nav-brand" id="brand" href="#home" onclick="switchView('home');return false;">
       <img src="/favicon.png" alt="" width="34" height="34">
       <span><i>CHUD</i> HOME!!</span>
     </a>
+    <div class="joke" id="joke" hidden></div>
     <nav class="nav-links" aria-label="Primary">
       <button class="pill" onclick="switchView('home')">HOME &#127968;</button>
       <button class="pill" onclick="switchView('games')">GAMES &#127918;</button>
@@ -49,6 +43,7 @@
         <span class="float f3" aria-hidden="true">🕹️</span>
         <span class="float f4" aria-hidden="true">🍕</span>
         <span class="float f5" aria-hidden="true">😎</span>
+        <span class="stamp" aria-hidden="true">est.<br>2026<br>&#8710;</span>
 
         <p class="hero-kicker">&#127921; MAIN MENU &#127921;</p>
         <h1 class="hero-title">PLAY <span class="hl hl-pink">ANYTHING</span>.<br>BROWSE <span class="hl hl-cyan">ANYTHING</span>!</h1>
@@ -128,6 +123,8 @@
       <small id="loading-target"></small>
     </div>
   </div>
+
+  <button class="totop" id="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" hidden>&#11014; top!!</button>
 
   <script src="https://cdn.jsdelivr.net/gh/Cronusz3n96/stolenstuff@main/noah-js-folder/games.js"></script>
   <script>
