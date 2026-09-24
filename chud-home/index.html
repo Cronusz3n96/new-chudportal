@@ -3,33 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chud Home &mdash; Play anything. Browse anything.</title>
-  <meta name="description" content="Chud Home is your launcher for unblocked games and a fully proxied browser, right in your tab.">
-  <meta property="og:title" content="Chud Home">
-  <meta property="og:description" content="Play anything. Browse anything.">
+  <title>Chud Home!! play games &amp; survive the block</title>
+  <meta name="description" content="Chud Home - free unblocked games AND a secret proxy browser all in one tab. no downloads, no cap.">
+  <meta property="og:title" content="Chud Home!!">
+  <meta property="og:description" content="free unblocked games AND a secret proxy browser. no cap.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="/favicon.png">
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Comic+Neue:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/app.css">
   <script>window.__WISP_HOST='algebraforhighschool.a.onjrnm.co.uk';window.__AI_URL='';</script>
 </head>
 <body>
 
-  <div class="glow glow-a" aria-hidden="true"></div>
-  <div class="glow glow-b" aria-hidden="true"></div>
+  <div class="rainbow" aria-hidden="true"></div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-inner">
+      <span>⭐ CHUD HOME ⭐ FREE GAMES ⭐ SECRET PROXY ⭐ MADE IN STUDY HALL ⭐ NO DOWNLOADS ⭐ CAN'T GET BLOCKED ⭐&nbsp;</span>
+      <span>⭐ CHUD HOME ⭐ FREE GAMES ⭐ SECRET PROXY ⭐ MADE IN STUDY HALL ⭐ NO DOWNLOADS ⭐ CAN'T GET BLOCKED ⭐&nbsp;</span>
+    </div>
+  </div>
 
   <header class="nav">
     <a class="nav-brand" href="#home" onclick="switchView('home');return false;">
-      <img src="/favicon.png" alt="" width="30" height="30">
-      <span>CHUD <em>HOME</em></span>
+      <img src="/favicon.png" alt="" width="34" height="34">
+      <span><i>CHUD</i> HOME!!</span>
     </a>
     <nav class="nav-links" aria-label="Primary">
-      <button class="pill" onclick="switchView('home')">Home</button>
-      <button class="pill" onclick="switchView('games')">Games</button>
-      <button class="pill" onclick="openBrowser('https://www.google.com')">Browser</button>
+      <button class="pill" onclick="switchView('home')">HOME &#127968;</button>
+      <button class="pill" onclick="switchView('games')">GAMES &#127918;</button>
+      <button class="pill" onclick="openBrowser('https://www.google.com')">BROWSER &#127754;</button>
     </nav>
   </header>
 
@@ -38,28 +44,35 @@
     <!-- HOME -->
     <section id="view-home" class="view">
       <div class="hero">
-        <p class="hero-kicker">THE HOME OF CHUD</p>
-        <h1 class="hero-title">Play anything. <span>Browse anything.</span></h1>
-        <p class="hero-sub">Every game you could want plus a fully proxied browser &mdash; nothing installed, nothing blocked.</p>
+        <span class="float f1" aria-hidden="true">🎮</span>
+        <span class="float f2" aria-hidden="true">✨</span>
+        <span class="float f3" aria-hidden="true">🕹️</span>
+        <span class="float f4" aria-hidden="true">🍕</span>
+        <span class="float f5" aria-hidden="true">😎</span>
+
+        <p class="hero-kicker">&#127921; MAIN MENU &#127921;</p>
+        <h1 class="hero-title">PLAY <span class="hl hl-pink">ANYTHING</span>.<br>BROWSE <span class="hl hl-cyan">ANYTHING</span>!</h1>
+        <p class="hero-sub">every game u could ever want + a secret proxy browser. no downloads, nothing to install, works when the wifi is mid.</p>
 
         <form class="search" id="hero-search" onsubmit="heroGo(event)">
-          <span class="search-ico" aria-hidden="true">&#9906;</span>
-          <input id="hero-input" type="text" placeholder="Type a game name or paste a URL&hellip;" autocomplete="off" spellcheck="false">
-          <button type="submit" class="search-go">Go</button>
+          <span class="search-ico" aria-hidden="true">&#128270;</span>
+          <input id="hero-input" type="text" placeholder="type a game or paste a url..." autocomplete="off" spellcheck="false">
+          <button type="submit" class="search-go">GO!!</button>
         </form>
+        <p class="search-tip">&#128073; seriously just try it, type a game name or a website</p>
 
         <div class="hero-actions">
-          <button class="chip" onclick="openBrowser('https://www.google.com')">Open Browser</button>
-          <button class="chip" onclick="randomGame()">Random Game</button>
-          <button class="chip" onclick="switchView('games')">All Games</button>
+          <button class="chip chip-pink" onclick="openBrowser('https://www.google.com')">&#127754; open browser</button>
+          <button class="chip chip-yellow" onclick="randomGame()">&#127922; random game</button>
+          <button class="chip chip-lime" onclick="switchView('games')">&#127918; all games</button>
         </div>
 
         <div class="stat-row" id="stat-row"></div>
       </div>
 
       <div class="rail-head">
-        <h2>Featured</h2>
-        <button class="chip chip-sm" onclick="switchView('games')">See all &rarr;</button>
+        <h2>&#128293; Featured Jams</h2>
+        <button class="chip chip-gray" onclick="switchView('games')">see all &rarr;</button>
       </div>
       <div class="rail" id="featured-rail"></div>
     </section>
@@ -67,50 +80,51 @@
     <!-- GAMES -->
     <section id="view-games" class="view" hidden>
       <div class="subbar">
-        <h2 class="subbar-title">Game Library <span id="game-count"></span></h2>
+        <h2 class="subbar-title">&#127918; The Game Vault <span id="game-count"></span></h2>
         <div class="subbar-controls">
           <div class="search search-sm">
-            <span class="search-ico" aria-hidden="true">&#9906;</span>
-            <input id="game-search" type="text" placeholder="Search games&hellip;" oninput="renderGames()" autocomplete="off" spellcheck="false">
+            <span class="search-ico" aria-hidden="true">&#128270;</span>
+            <input id="game-search" type="text" placeholder="search games..." oninput="renderGames()" autocomplete="off" spellcheck="false">
           </div>
           <select id="sort-select" class="sort" onchange="renderGames()">
-            <option value="featured">Featured</option>
-            <option value="az">A&ndash;Z</option>
-            <option value="za">Z&ndash;A</option>
-            <option value="new">Newest</option>
+            <option value="featured">featured</option>
+            <option value="az">a-z</option>
+            <option value="za">z-a</option>
+            <option value="new">newest</option>
           </select>
-          <button class="chip" onclick="shuffleGames()">&#9881; Shuffle</button>
+          <button class="chip chip-cyan" onclick="shuffleGames()">&#128257; shuffle!!</button>
         </div>
       </div>
       <div class="grid" id="game-grid"></div>
-      <p class="empty" id="empty-state" hidden>No games match that search.</p>
+      <p class="empty" id="empty-state" hidden>nothing matches bro. try again.</p>
     </section>
 
     <!-- BROWSER -->
     <section id="view-browser" class="view" hidden>
       <div class="browser-bar">
-        <button class="bbtn" id="browser-exit" title="Back to Chud Home" onclick="closeBrowser()">&#8592; Home</button>
+        <button class="bbtn" id="browser-exit" title="back to chud home" onclick="closeBrowser()">&#8592; home</button>
         <form class="search search-browser" onsubmit="browserGo(event)">
-          <span class="search-ico" aria-hidden="true">&#128269;</span>
-          <input id="urlbar" type="text" placeholder="Search or enter a URL&hellip;" autocomplete="off" spellcheck="false">
-          <button type="submit" class="search-go">Browse</button>
+          <span class="search-ico" aria-hidden="true">&#128270;</span>
+          <input id="urlbar" type="text" placeholder="search or paste a url..." autocomplete="off" spellcheck="false">
+          <button type="submit" class="search-go">browse</button>
         </form>
-        <button class="bbtn" title="Reload" onclick="proxyReload()">&#8635;</button>
-        <button class="bbtn" title="Open in new tab" onclick="proxyNewTab()">&#8599;</button>
+        <button class="bbtn" title="reload" onclick="proxyReload()">&#8635;</button>
+        <button class="bbtn" title="open in a new tab" onclick="proxyNewTab()">&#8599;</button>
       </div>
-      <iframe id="proxy-frame" title="Browsed content"></iframe>
+      <iframe id="proxy-frame" title="browsed content"></iframe>
     </section>
 
   </main>
 
   <footer class="foot">
-    <span>Chud Home &mdash; built for the hallway crowd.</span>
+    <p>chud home &#127968; knocked together by some guy in study hall &#128153;</p>
+    <small>games from the gn-math vault &#129305; proxy tech is magic &#129518;</small>
   </footer>
 
   <div id="loading" class="loading" hidden>
     <div class="loading-card">
-      <div class="loader" aria-hidden="true"></div>
-      <p>Firing up the proxy&hellip;</p>
+      <div class="loader" aria-hidden="true">&#128640;</div>
+      <p>loading... dont blink!!</p>
       <small id="loading-target"></small>
     </div>
   </div>

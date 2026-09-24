@@ -16,8 +16,9 @@
     ['home', 'games', 'browser'].forEach(function (v) {
       $('view-' + v).hidden = (v !== name);
     });
+    var map = { home: 0, games: 1, browser: 2 };
     document.querySelectorAll('.nav .pill').forEach(function (b, i) {
-      b.classList.toggle('pill-active', b.textContent.trim().toLowerCase() === name || (name === 'browser' && i === 2));
+      b.classList.toggle('pill-active', i === map[name]);
     });
     if (name === 'home') { window.scrollTo({ top: 0 }); }
     if (name === 'games') { $('game-search').focus(); }
