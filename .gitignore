@@ -41,3 +41,7 @@ yarn-error.log*
 scramjet-proxy.zip
 # local draft app (keep off the repo)
 chudai-draft/
+
+# ── instagram tracker secrets / local data ──
+igtrackerforall/cookie.txt
+igtrackerforall/history/
