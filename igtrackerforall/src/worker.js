@@ -100,15 +100,16 @@ async function track() {
   finally { btn.disabled = false; }
 }
 function deltaText(d){ if(d===0) return '<span class="delta same">0</span>'; return d>0?'<span class="delta up">+'+d+'</span>':'<span class="delta down">'+d+'</span>'; }
+function igerr(el){ el.style.visibility='hidden'; }
 function person(p){
-  return '<div class="person"><img src="' + (p.profilePic||'') + '" onerror="this.style.visibility=\'hidden\'"><div class="u">@' + p.username + '</div><div class="n">' + (p.fullName||'') + '</div></div>';
+  return '<div class="person"><img src="' + (p.profilePic||'') + '" onerror="igerr(this)"><div class="u">@' + p.username + '</div><div class="n">' + (p.fullName||'') + '</div></div>';
 }
 function render(j){
   const u=j.user;
   out.innerHTML='';
   const card=document.createElement('div'); card.className='card';
   card.innerHTML=
-    '<div class="profile"><img class="avatar" src="'+(u.profilePic||'')+'" onerror="this.style.visibility=\'hidden\'">'+
+    '<div class="profile"><img class="avatar" src="'+(u.profilePic||'')+'" onerror="igerr(this)">'+
     '<div><div class="pname">'+u.fullName+' '+(u.verified?'<span class="verified">&#10003;</span>':'')+(u.private?'<span class="private">&#128274; private</span>':'')+'</div>'+
     '<div class="uname">@'+u.username+'</div>'+
     (u.bio?'<div class="bio">'+u.bio.replace(/</g,'&lt;')+'</div>':'')+
@@ -171,11 +172,11 @@ export default {
       return await getProfile(username, env);
     }
 
-    return new Response(HTML, {headers:{'content-type':'text/html; charset=utf-8'}});
+    return new Response(HTML, {headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
   }
 };
 
-function json(o){ return new Response(JSON.stringify(o),{headers:{'content-type':'application/json','access-control-allow-origin':'*'}}); }
+function json(o){ return new Response(JSON.stringify(o),{headers:{'content-type':'application/json','access-control-allow-origin':'*','cache-control':'no-store'}}); }
 
 async function getProfile(username, env){
   const sid = await env.IGTRACKER_DB.get('sessionid');
