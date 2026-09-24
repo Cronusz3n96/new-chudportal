@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hollow Web</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-wrap">
+  <canvas id="game" width="1280" height="720"></canvas>
+
+  <div id="hud">
+    <div id="masks"></div>
+    <div id="soulbar">
+      <div id="soulfill"></div>
+    </div>
+    <div id="roomname"></div>
+  </div>
+
+  <div id="menu" class="overlay">
+    <h1>HOLLOW <span>WEB</span></h1>
+    <p class="sub">a small metroidvania tribute</p>
+    <div class="controls">
+      <div><b>Move</b> A / D or &larr; &rarr;</div>
+      <div><b>Jump</b> W or Space</div>
+      <div><b>Nail</b> J or X</div>
+      <div><b>Dash</b> K or Shift</div>
+      <div><b>Heal</b> L or C</div>
+      <div><b>Pause</b> Esc</div>
+    </div>
+    <button id="playBtn">PRESS START</button>
+    <p class="tip">Awake, little ghost. Reach the stag door at the far end of the caverns.</p>
+  </div>
+
+  <div id="gameover" class="overlay hidden">
+    <h2>SHADE</h2>
+    <p>Your body crumbles... but a bench still remembers you.</p>
+    <button id="retryBtn">RISE AGAIN</button>
+  </div>
+
+  <div id="win" class="overlay hidden">
+    <h2>DAWN</h2>
+    <p>You reach the stag door. The ancient tunnels grant passage.</p>
+    <button id="againBtn">PLAY AGAIN</button>
+  </div>
+
+  <div id="pause" class="overlay hidden">
+    <h2>PAUSED</h2>
+    <button id="resumeBtn">RESUME</button>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
