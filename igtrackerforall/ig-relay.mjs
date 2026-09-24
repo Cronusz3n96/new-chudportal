@@ -48,13 +48,18 @@ function recentOf(arr) {
 
 async function getProfile(username) {
   const cookie = loadCookie();
+  const csrf = (cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
   const headers = {
     'user-agent': UA,
     'x-ig-app-id': APP_ID,
     'accept': 'application/json, text/plain, */*',
     'accept-language': 'en-US,en;q=0.9',
     'referer': 'https://www.instagram.com/' + username + '/',
+    'x-requested-with': 'XMLHttpRequest',
+    'x-web-timezone-offset': String(new Date().getTimezoneOffset() / -60 * 3600),
+    'origin': 'https://www.instagram.com',
   };
+  if (csrf) headers['x-csrf-token'] = csrf;
   if (cookie) headers['cookie'] = cookie;
 
   let raw = null;
@@ -64,10 +69,16 @@ async function getProfile(username) {
     lastErr = { status: r.status, host };
     if (r.ok && r.json.data && r.json.data.user) { raw = r.json.data.user; break; }
     lastErr.msg = r.msg;
+    await new Promise(r => setTimeout(r, 900));
   }
 
   if (!raw) {
-    return json({ ok: false, error: 'Could not fetch profile. Instagram HTTP ' + lastErr.status + (lastErr.msg ? ' - "' + lastErr.msg + '"' : '') + (cookie ? '' : ' (no cookie found - create cookie.txt next to this file, or set IG_COOKIE).') });
+    const hint = lastErr.status === 429
+      ? ' Instagram rate limited this IP (HTTP 429). Wait 10+ minutes and stop spamming, OR make sure cookie.txt contains your FULL instagram cookie (F12 > Network tab > copy the whole "cookie:" request header), not just sessionid.'
+      : lastErr.status === 401 || lastErr.status === 400
+        ? ' Instagram rejected your session (HTTP ' + lastErr.status + (lastErr.msg ? ' - "' + lastErr.msg + '"' : '') + '). Re-login to Instagram and copy the full cookie again.'
+        : (lastErr.msg ? ' - "' + lastErr.msg + '"' : '');
+    return json({ ok: false, error: 'Could not fetch profile. HTTP ' + lastErr.status + hint });
   }
 
   const user = {
@@ -90,8 +101,10 @@ async function getProfile(username) {
 
   if (cookie) {
     const uid = user.id;
+    await new Promise(r => setTimeout(r, 1200));
     const f = await igJson('https://www.instagram.com/api/v1/friendships/' + uid + '/followers/?count=12&search_surface=follow_list_page', headers);
     if (f.ok && f.json.users && f.json.users.length) followersRecent = recentOf(f.json.users.map(u => ({ node: u })));
+    await new Promise(r => setTimeout(r, 1200));
     const g = await igJson('https://www.instagram.com/api/v1/friendships/' + uid + '/following/?count=12&search_surface=follow_list_page', headers);
     if (g.ok && g.json.users && g.json.users.length) followingRecent = recentOf(g.json.users.map(u => ({ node: u })));
   }
