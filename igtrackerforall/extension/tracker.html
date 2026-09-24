@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IGTrackerForAll</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+  body { background:#0a0a0f; color:#eee; min-height:100vh; }
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 60px; }
+  header { text-align:center; padding:30px 0 22px; }
+  header h1 { font-size:1.7rem; background:linear-gradient(90deg,#f09433,#e6683c,#dc2743,#bc1888); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  header p { color:#888; margin-top:6px; font-size:.85rem; }
+  .hint { max-width:440px; margin:12px auto 0; background:#14141c; border:1px solid #222; border-radius:10px; padding:10px 14px; font-size:.78rem; color:#999; }
+  .search { display:flex; gap:8px; max-width:440px; margin:18px auto 0; }
+  .search input { flex:1; padding:13px 16px; border-radius:10px; border:1px solid #222; background:#14141c; color:#eee; font-size:1rem; outline:none; }
+  .search input:focus { border-color:#e6683c; }
+  .search button { padding:13px 22px; border:none; border-radius:10px; background:linear-gradient(90deg,#dc2743,#bc1888); color:#fff; font-weight:700; cursor:pointer; }
+  .search button:disabled { opacity:.5; cursor:wait; }
+  .status { text-align:center; color:#e6683c; font-size:.85rem; margin-top:14px; min-height:20px; }
+  .card { background:#12121a; border:1px solid #1e1e28; border-radius:16px; padding:22px; margin-top:22px; }
+  .profile { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .avatar { width:84px; height:84px; border-radius:50%; border:3px solid #dc2743; object-fit:cover; background:#1e1e28; }
+  .pname { font-size:1.25rem; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .uname { color:#999; font-size:.9rem; margin-top:2px; }
+  .bio { color:#bbb; margin-top:8px; font-size:.88rem; line-height:1.4; }
+  .verified { color:#4797d7; font-size:1rem; }
+  .stats { display:flex; gap:34px; margin-top:18px; flex-wrap:wrap; }
+  .stat b { font-size:1.3rem; display:block; }
+  .stat span { color:#888; font-size:.75rem; text-transform:uppercase; letter-spacing:1px; }
+  .delta { font-size:.8rem; margin-left:6px; font-weight:700; }
+  .up { color:#3ddc84; } .down { color:#ff5470; } .same { color:#777; }
+  .chart { margin-top:22px; }
+  .chart svg { width:100%; height:70px; display:block; }
+  h2 { font-size:1rem; margin:26px 0 12px; color:#ddd; text-transform:uppercase; letter-spacing:1px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+  .person { background:#16161f; border:1px solid #23232f; border-radius:10px; padding:10px; text-align:center; }
+  .person img { width:52px; height:52px; border-radius:50%; object-fit:cover; margin-bottom:6px; }
+  .person .u { font-size:.82rem; color:#e6683c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .person .n { font-size:.7rem; color:#777; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .new { border:1px solid #3ddc84; }
+  .none { color:#666; font-size:.85rem; }
+  .private { color:#ffb020; font-size:.9rem; }
+  footer { text-align:center; color:#555; font-size:.75rem; margin-top:40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>IGTrackerForAll</h1>
+    <p>Track the most recent followers and follows of any Instagram account.</p>
+  </header>
+  <div class="hint">Using your own browser session &mdash; no login wall, no IP blocks. Green badge = new since your last check.</div>
+  <div class="search">
+    <input id="u" type="text" placeholder="@username (e.g. jamielifestyle_)" spellcheck="false">
+    <button id="go">Track</button>
+  </div>
+  <div class="status" id="status"></div>
+  <div id="out"></div>
+  <footer>IGTrackerForAll &mdash; not affiliated with Meta / Instagram.</footer>
+</div>
+<script src="tracker.js"></script>
+</body>
+</html>

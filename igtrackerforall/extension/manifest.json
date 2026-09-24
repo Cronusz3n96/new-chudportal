@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "IGTrackerForAll",
+  "version": "1.0.0",
+  "description": "Track the most recent followers and follows of any Instagram account, straight from your browser.",
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": [
+    "https://www.instagram.com/*",
+    "https://i.instagram.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "IGTrackerForAll - open tracker"
+  },
+  "icons": {
+    "128": "icon128.png"
+  }
+}
