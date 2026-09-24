@@ -149,19 +149,27 @@ export default {
       if (request.method === 'POST'){
         try{
           const b = await request.json();
-          if(b.sessionid && /^[0-9A-Za-z%:_\-]{20,}$/.test(b.sessionid)){
-            await env.IGTRACKER_DB.put('sessionid', b.sessionid);
-            return json({ok:true});
+          const raw = b.cookie || b.sessionid || '';
+          const val = String(raw).trim().replace(/^["']|["']$/g,'').replace(/;+$/,'');
+          if(!val || val.length < 10){ return json({ok:false, error:'Empty value.'}); }
+          if(val.indexOf('=') !== -1){
+            await env.IGTRACKER_DB.put('cookie', val);
+            await env.IGTRACKER_DB.delete('sessionid');
+          } else {
+            await env.IGTRACKER_DB.put('sessionid', val);
+            await env.IGTRACKER_DB.delete('cookie');
           }
+          return json({ok:true, full: val.indexOf('=') !== -1});
         }catch(e){}
-        return json({ok:false, error:'Invalid sessionid.'});
+        return json({ok:false, error:'Invalid session.'});
       }
       if (request.method === 'DELETE'){
         await env.IGTRACKER_DB.delete('sessionid');
         return json({ok:true});
       }
       const sid = await env.IGTRACKER_DB.get('sessionid');
-      return json({on: !!sid});
+      const ck = await env.IGTRACKER_DB.get('cookie');
+      return json({on: !!(sid||ck)});
     }
 
     if (url.pathname === '/api/profile') {
@@ -179,6 +187,7 @@ export default {
 function json(o){ return new Response(JSON.stringify(o),{headers:{'content-type':'application/json','access-control-allow-origin':'*','cache-control':'no-store'}}); }
 
 async function getProfile(username, env){
+  const fullCookie = await env.IGTRACKER_DB.get('cookie');
   const sid = await env.IGTRACKER_DB.get('sessionid');
   const headers = {
     'user-agent': UA,
@@ -187,22 +196,57 @@ async function getProfile(username, env){
     'accept-language': 'en-US,en;q=0.9',
     'referer': 'https://www.instagram.com/' + username + '/',
   };
-  if(sid) headers['cookie'] = 'sessionid=' + sid;
+  if(fullCookie) headers['cookie'] = fullCookie;
+  else if(sid) headers['cookie'] = 'sessionid=' + sid;
 
   let body = null;
+  let lastErr = null;
   for(const host of ['https://www.instagram.com','https://i.instagram.com']){
     try{
       const res = await fetch(host + '/api/v1/users/web_profile_info/?username=' + username, {headers});
+      lastErr = {status: res.status, host: host};
       if(res.status===200){
         const t = await res.text();
         try{ body = JSON.parse(t); }catch(e){}
         if(body) break;
+      } else if(res.status===401 || res.status===403){
+        try{
+          const tj = await res.json();
+          lastErr.msg = tj.message || tj.error_type || tj.spam || null;
+          lastErr.raw = tj.status || null;
+        }catch(e){}
       }
-    }catch(e){}
+    }catch(e){ lastErr = {status:0, host:host, net:e.message}; }
   }
 
   if(!body || !body.data || !body.data.user){
-    return json({ok:false, error:'Instagram blocked the request (rate limited or login wall). Paste your sessionid in the bar above, or try again in a few minutes.'});
+    const hdr = {...headers, 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'};
+    for(const host of ['https://www.instagram.com','https://i.instagram.com']){
+      try{
+        const res = await fetch(host + '/' + username + '/', {headers:hdr});
+        lastErr = {status:res.status, host:host, via:'html'};
+        if(res.status===200){
+          const html = await res.text();
+          const m = html.match(/window\._sharedData\s*=\s*(\{.*?\});\s*<\/script>/);
+          if(m){
+            try{
+              const sd = JSON.parse(m[1]);
+              const p = sd.entry_data && sd.entry_data.ProfilePage && sd.entry_data.ProfilePage[0] && sd.entry_data.ProfilePage[0].graphql && sd.entry_data.ProfilePage[0].graphql.user;
+              if(p && p.username){ body = {data:{user:p}}; break; }
+            }catch(e){}
+          }
+        } else if(res.status===401 || res.status===403){
+          try{ const tj = await res.json(); lastErr.msg = tj.message || lastErr.msg; }catch(e){}
+        }
+      }catch(e){}
+    }
+  }
+
+  if(!body || !body.data || !body.data.user){
+    const why = lastErr && lastErr.msg
+      ? ' Instagram response: HTTP ' + lastErr.status + (lastErr.raw? ' ('+lastErr.raw+')' : '') + ' - "' + lastErr.msg + '"'
+      : ' No useful response.';
+    return json({ok:false, error:'Could not fetch profile. Login wall or rate limit.' + why + ((sid||fullCookie)? ' Check that your session/cookie is from an account that is still logged in.' : ' Paste your sessionid in the bar above.')});
   }
 
   const raw = body.data.user;
@@ -224,7 +268,7 @@ async function getProfile(username, env){
   let followersRecent = recentOf(followedBy.edges);
   let followingRecent = recentOf(following.edges);
 
-  if(sid){
+  if(fullCookie || sid){
     const uid = user.id;
     const fRes = await fetch('https://www.instagram.com/api/v1/friendships/' + uid + '/followers/?count=12&search_surface=follow_list_page', {headers});
     if(fRes.status===200){
