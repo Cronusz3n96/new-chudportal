@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "igtrackerforall",
+  "compatibility_date": "2026-09-07",
+  "main": "src/worker.js",
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "IGTRACKER_DB",
+      "id": "34b7d5ecb980486ca69fe552f8b89052"
+    }
+  ]
+}
