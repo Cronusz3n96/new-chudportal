@@ -7,15 +7,15 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --panel: #14141c;
-    --panel2: #1c1c26;
-    --line: #26262f;
-    --text: #f0f0f5;
-    --muted: #8b8b98;
-    --acid: #a3e635;
-    --acid-dim: #65a30d;
-    --red: #e50914;
+    --bg: #17110b;
+    --panel: #211910;
+    --panel2: #2b2115;
+    --line: #3e3122;
+    --text: #f7f2ea;
+    --muted: #b0a28e;
+    --acid: #f7f2ea;
+    --acid-dim: #cbbfa9;
+    --red: #f7f2ea;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
@@ -32,10 +32,10 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 60;
     display: flex; align-items: center; gap: 22px;
     padding: 0 30px; height: 64px;
-    background: linear-gradient(rgba(10,10,15,.98), rgba(10,10,15,.9));
+    background: linear-gradient(rgba(23,17,11,.98), rgba(23,17,11,.9));
     border-bottom: 1px solid var(--line);
   }
-  header.scrolled { background: rgba(10,10,15,.95); }
+  header.scrolled { background: rgba(23,17,11,.95); }
   .logo { font-weight: 900; font-size: 25px; letter-spacing: 1px; white-space: nowrap; }
   .logo span { color: var(--acid); }
   nav { display: flex; gap: 18px; }
@@ -60,7 +60,7 @@
   .hero { position: relative; height: min(78vh, 620px); min-height: 420px; overflow: hidden; }
   .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center 20%; animation: kenburns 22s ease-in-out infinite alternate; }
   @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.08); } }
-  .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg) 2%, rgba(10,10,15,.25) 45%, rgba(10,10,15,.35) 75%, rgba(10,10,15,.55)); }
+  .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg) 2%, rgba(23,17,11,.25) 45%, rgba(23,17,11,.35) 75%, rgba(23,17,11,.55)); }
   .hero-content { position: absolute; z-index: 2; bottom: 0; left: 0; right: 0; padding: 50px 30px 46px; display: flex; flex-direction: column; gap: 12px; max-width: 980px; }
   .hero-badge { align-self: flex-start; background: var(--acid); color: #111; font-size: 11px; font-weight: 900; letter-spacing: 2px; padding: 5px 12px; border-radius: 4px; }
   .hero-title { font-size: clamp(34px, 5.5vw, 58px); font-weight: 900; line-height: 1.02; text-shadow: 0 3px 18px rgba(0,0,0,.7); }
@@ -91,7 +91,7 @@
   .scrollbtn {
     position: absolute; top: 50%; translate: 0 -50%; z-index: 5;
     width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
-    background: rgba(10,10,15,.7); color: #fff; font-size: 18px;
+    background: rgba(23,17,11,.7); color: #fff; font-size: 18px;
     opacity: 0; transition: .2s; backdrop-filter: blur(4px);
   }
   .hrow:hover .scrollbtn { opacity: 1; }
@@ -152,9 +152,9 @@
   .watch-hero { position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
   .watch-hero img { width: 100%; aspect-ratio: 21/9; object-fit: cover; }
   .watch-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.1), var(--bg)); }
-  .player { position: relative; z-index: 2; aspect-ratio: 16/9; margin-top: -30px; border-radius: 12px; overflow: hidden; box-shadow: 0 18px 60px rgba(0,0,0,.8); background: #000; }
+  .player { position: relative; z-index: 2; aspect-ratio: 16/9; margin-top: -30px; border-radius: 12px; overflow: hidden; box-shadow: 0 18px 60px rgba(0,0,0,.8); background: #17110b; }
   .player iframe { width: 100%; height: 100%; border: none; }
-  .player .waiting { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; background: #000; }
+  .player .waiting { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; background: #17110b; }
   .servers { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
   .srv { background: var(--panel); color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
   .srv.active { background: var(--acid); color: #111; border-color: var(--acid); }
@@ -192,7 +192,7 @@
   footer .copy { margin-top: 16px; font-size: 11.5px; }
 
   /* ---------- trailer modal ---------- */
-  .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.85); padding: 20px; }
+  .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; background: rgba(15,11,7,.9); padding: 20px; }
   .modal.open { display: flex; }
   .modal-box { width: 100%; max-width: 900px; position: relative; }
   .modal-box iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 10px; }
