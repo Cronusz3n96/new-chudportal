@@ -48,7 +48,12 @@ app.post("/api/chat", async (req, res) => {
     }
     const upstream = await fetch(AI_BACKEND, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        Authorization: req.get("authorization") || "",
+        "x-forwarded-for": req.ip || req.socket.remoteAddress || "",
+      },
       body: JSON.stringify({ messages }),
       signal: AbortSignal.timeout(90000),
     });

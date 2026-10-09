@@ -27,7 +27,7 @@ const CHUD_LOGO = "https://cdn.jsdelivr.net/gh/Cronusz3n96/hhbbhbh@main/logo.png
   </script>
 
     <meta charset="UTF-8">
-  <script>window.__WISP_HOST='';</script><script>window.__AI_URL='';</script>
+  <script>window.__WISP_HOST='';</script><script>window.__AI_URL='';</script><script>window.__SUPABASE_URL='https://udbnojvyaqmtnoywngha.supabase.co';window.__SUPABASE_ANON_KEY='sb_publishable_-ctB70kQmKV6XE6-wy-l4w_8xr456d0';</script>
   <script src="/bootstrap-init.js"></script>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 	 <title>Chud Portal | Chud OS - Chud Games, Chud Unblocked Games & Web Proxy</title>
@@ -6170,6 +6170,41 @@ footer p {
 <section id="ai-section">
   <button class="ai-back-btn" onclick="switchTab('lessons')">←</button>
   <div id="chat"></div>
+
+  <style>
+  #ai-auth{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 14px; margin:0 0 8px; border-radius:8px; background:rgba(20,22,28,0.65); border:1px solid rgba(var(--primary-orange-rgb),0.25); }
+  #ai-auth-status{ font-size:0.68rem; letter-spacing:1px; text-transform:uppercase; color:var(--gray-text); }
+  #ai-auth-btn{ background:var(--primary-orange); color:#111; border:none; border-radius:6px; padding:6px 14px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; cursor:pointer; font-family:inherit; }
+  #ai-auth-btn:hover{ filter:brightness(1.12); }
+  #ai-auth-modal{ position:fixed; inset:0; z-index:50000; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.65); font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  #ai-auth-modal .card{ background:#14161c; border:1px solid rgba(var(--primary-orange-rgb),0.4); border-radius:12px; padding:22px; width:300px; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+  #ai-auth-modal h3{ margin:0; font-size:0.8rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--light-text); }
+  #ai-auth-close{ background:none; border:none; color:var(--gray-text); font-size:1rem; cursor:pointer; line-height:1; }
+  #ai-auth-modal input{ width:100%; box-sizing:border-box; background:#0d0f13; border:1px solid rgba(255,255,255,0.12); border-radius:7px; color:#eee; padding:9px 11px; margin-bottom:10px; font-size:0.82rem; }
+  #ai-auth-modal input:focus{ outline:none; border-color:var(--primary-orange); }
+  #ai-auth-submit{ width:100%; background:var(--primary-orange); color:#111; border:none; border-radius:7px; padding:10px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-size:0.75rem; font-family:inherit; }
+  #ai-auth-toggle{ width:100%; margin-top:8px; background:none; border:none; color:var(--gray-text); font-size:0.7rem; cursor:pointer; text-decoration:underline; font-family:inherit; }
+  #ai-auth-msg{ min-height:14px; font-size:0.7rem; color:#ff8a7a; margin:4px 0 8px; }
+  </style>
+  <div id="ai-auth">
+    <span id="ai-auth-status">Sign in to use AI chat</span>
+    <button id="ai-auth-btn">Sign in</button>
+  </div>
+  <div id="ai-auth-modal">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 id="ai-auth-title">Sign in to chat</h3>
+        <button id="ai-auth-close" title="close">✕</button>
+      </div>
+      <form id="ai-auth-form" autocomplete="on">
+        <input type="email" id="ai-auth-email" placeholder="email" autocomplete="email" required />
+        <input type="password" id="ai-auth-pass" placeholder="password" autocomplete="current-password" required />
+        <div id="ai-auth-msg"></div>
+        <button type="submit" id="ai-auth-submit" data-mode="signin">Sign in</button>
+      </form>
+      <button id="ai-auth-toggle">New here? Create an account</button>
+    </div>
+  </div>
   <div id="form">
     <span class="ai-prompt">&gt;</span>
     <input type="text" id="input" placeholder="type something..." autocomplete="off" disabled />
@@ -13573,7 +13608,8 @@ if(!raw){setBlobStatus('No link detected. Paste a URL first.','err');return}
     })
 })()
 
-	</script> 
+\t</script> 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 ;
 // AI chat
@@ -13585,6 +13621,97 @@ if(!raw){setBlobStatus('No link detected. Paste a URL first.','err');return}
     const API_URL = (window.__AI_URL && window.__AI_URL.trim()) ? window.__AI_URL : '/api/chat';
     let history = [];
     let busy = false;
+
+    // ── Supabase auth gate ──
+    const SB_URL = (window.__SUPABASE_URL || '').trim();
+    const SB_KEY = (window.__SUPABASE_ANON_KEY || '').trim();
+    let supabase = null;
+    let accessToken = '';
+    const authBar = document.getElementById('ai-auth');
+    const authStatus = document.getElementById('ai-auth-status');
+    const authBtn = document.getElementById('ai-auth-btn');
+    const authModal = document.getElementById('ai-auth-modal');
+    const authForm = document.getElementById('ai-auth-form');
+    const authEmail = document.getElementById('ai-auth-email');
+    const authPass = document.getElementById('ai-auth-pass');
+    const authMsg = document.getElementById('ai-auth-msg');
+    const authSubmit = document.getElementById('ai-auth-submit');
+    const authToggle = document.getElementById('ai-auth-toggle');
+    const authTitle = document.getElementById('ai-auth-title');
+    const authClose = document.getElementById('ai-auth-close');
+
+    function hasAuthConfig(){ return !!(SB_URL && SB_KEY && window.supabase); }
+
+    function showAuthModal(){
+      if (authModal) authModal.style.display = 'flex';
+      if (authEmail) authEmail.focus();
+    }
+    function hideAuthModal(){
+      if (authModal) authModal.style.display = 'none';
+      if (authMsg) authMsg.textContent = '';
+    }
+    function displayName(user){
+      const meta = user && user.user_metadata;
+      return (user && (user.email || (meta && (meta.name || meta.full_name)))) || 'signed in';
+    }
+    function applySession(session){
+      accessToken = (session && session.access_token) ? session.access_token : '';
+      if (authStatus && authBtn) {
+        if (accessToken) {
+          authStatus.textContent = '\u2713 ' + displayName(session.user);
+          authBtn.textContent = 'Sign out';
+        } else {
+          authStatus.textContent = 'Sign in to use AI chat';
+          authBtn.textContent = 'Sign in';
+        }
+      }
+      setBusy(busy);
+    }
+    function toggleAuthMode(){
+      const mode = authSubmit.getAttribute('data-mode') === 'signin' ? 'signup' : 'signin';
+      authSubmit.setAttribute('data-mode', mode);
+      authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Create account';
+      authTitle.textContent = mode === 'signin' ? 'Sign in to chat' : 'Create an account';
+      authToggle.textContent = mode === 'signin' ? 'New here? Create an account' : 'Have an account? Sign in';
+      if (authMsg) authMsg.textContent = '';
+    }
+    async function submitAuth(e){
+      e.preventDefault();
+      if (!supabase) return;
+      const email = authEmail.value.trim();
+      const pass = authPass.value;
+      if (authMsg) authMsg.textContent = '';
+      const mode = authSubmit.getAttribute('data-mode');
+      try {
+        if (mode === 'signin') {
+          const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+          hideAuthModal();
+        } else {
+          const { error } = await supabase.auth.signUp({ email, password: pass });
+          if (error) throw error;
+          if (authMsg) authMsg.textContent = 'Account created — confirm your email, then sign in.';
+          toggleAuthMode();
+        }
+      } catch(err) {
+        if (authMsg) authMsg.textContent = String((err && err.message) || err);
+        else { try { alert(String((err && err.message) || err)); } catch(_x){} }
+      }
+    }
+    function initAuth(){
+      if (!hasAuthConfig()) return;
+      supabase = window.supabase.createClient(SB_URL, SB_KEY);
+      supabase.auth.getSession().then(function(r){ applySession(r.data.session || null); });
+      supabase.auth.onAuthStateChange(function(_e, s){ applySession(s); });
+      if (authBtn) authBtn.addEventListener('click', function(){
+        if (accessToken) supabase.auth.signOut();
+        else showAuthModal();
+      });
+      if (authClose) authClose.addEventListener('click', hideAuthModal);
+      if (authToggle) authToggle.addEventListener('click', toggleAuthMode);
+      if (authForm) authForm.addEventListener('submit', submitAuth);
+    }
+    initAuth();
 
     function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function renderMarkdown(el, txt){
@@ -13608,9 +13735,9 @@ if(!raw){setBlobStatus('No link detected. Paste a URL first.','err');return}
     }
     function setBusy(b){
       busy = b;
-      sendBtn.disabled = b;
-      inputEl.disabled = b;
-      if (!b) inputEl.focus();
+      sendBtn.disabled = b || !accessToken;
+      inputEl.disabled = b || !accessToken;
+      if (!b && accessToken) inputEl.focus();
     }
     function thinkingEl(){
       const el = document.createElement('span');
@@ -13645,6 +13772,7 @@ if(!raw){setBlobStatus('No link detected. Paste a URL first.','err');return}
     async function send(){
       const q = inputEl.value.trim();
       if (!q || busy) return;
+      if (!accessToken) { showAuthModal(); return; }
       inputEl.value = '';
       addMessage(q, 'user');
       history.push({ role: 'user', content: q });
@@ -13656,11 +13784,13 @@ if(!raw){setBlobStatus('No link detected. Paste a URL first.','err');return}
       try {
         const resp = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: Object.assign({ 'Content-Type': 'application/json' }, accessToken ? { 'Authorization': 'Bearer ' + accessToken } : {}),
           body: JSON.stringify({ messages: history, image: null }),
         });
         const data = await resp.json();
-        if (resp.ok && data.reply) txt = data.reply;
+        if (resp.status === 401) { txt = '! ' + (data.message || data.error || 'Please sign in to chat.'); if (!accessToken) showAuthModal(); }
+        else if (resp.status === 429) txt = '! ' + (data.message || data.error || 'Rate limited, try again later.');
+        else if (resp.ok && data.reply) txt = data.reply;
         else txt = '! ' + (data && data.error || ('Request failed ' + resp.status));
       } catch (err) {
         txt = '! ' + String(err && err.message || err);

@@ -9,6 +9,10 @@
   "ai": {
     "binding": "AI"
   },
+  "vars": {
+    "SUPABASE_URL": "https://udbnojvyaqmtnoywngha.supabase.co",
+    "SUPABASE_ANON_KEY": "sb_publishable_-ctB70kQmKV6XE6-wy-l4w_8xr456d0"
+  },
   "assets": {
     "directory": "scramjet-proxy"
   }
