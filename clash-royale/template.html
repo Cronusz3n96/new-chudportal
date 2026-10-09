@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Chud Royale — WASM Arena</title>
+<style>
+  :root {
+    --player: #2f6fed;
+    --enemy: #e04545;
+    --gold: #ffcf40;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: #0b1020;
+    color: #eef2ff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+  }
+  #app {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center;
+  }
+  #topbar {
+    width: 100%; max-width: 620px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; gap: 10px;
+  }
+  .crowns {
+    display: flex; align-items: center; gap: 4px;
+    font-weight: 800; font-size: 15px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 5px 10px; border-radius: 10px;
+  }
+  .crowns.side-player { color: #8fb6ff; }
+  .crowns.side-enemy { color: #ff9b9b; }
+  #timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800; font-size: 18px;
+    letter-spacing: .5px;
+  }
+  #arenaWrap {
+    position: relative;
+    flex: 1 1 auto; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 0;
+  }
+  canvas#arena {
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.55);
+    touch-action: none;
+    cursor: pointer;
+  }
+  #hand {
+    width: 100%; max-width: 620px;
+    display: flex; align-items: flex-end; gap: 8px;
+    padding: 10px 12px 14px;
+  }
+  #cards {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; flex: 1 1 auto;
+  }
+  .card {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #26314f, #1a2138);
+    border: 2px solid rgba(255,255,255,.14);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    transition: transform .08s ease, border-color .08s ease, opacity .08s;
+  }
+  .card .ico { font-size: clamp(18px, 5vw, 30px); line-height: 1; }
+  .card .nm { font-size: 10px; font-weight: 700; opacity: .85; }
+  .card .cost {
+    position: absolute; top: -7px; left: -7px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #b13ad6; border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900;
+  }
+  .card.selected {
+    border-color: var(--gold);
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 0 0 2px rgba(255,207,64,.35), 0 6px 18px rgba(0,0,0,.5);
+  }
+  .card.disabled { opacity: .42; filter: grayscale(.6); cursor: not-allowed; }
+  #nextWrap {
+    width: 62px; flex: 0 0 auto;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  #nextWrap .lbl { font-size: 9px; letter-spacing: 1px; opacity: .6; font-weight: 700; }
+  #nextCard {
+    width: 54px; aspect-ratio: 3/4;
+    border-radius: 10px; border: 2px dashed rgba(255,255,255,.2);
+    background: rgba(255,255,255,.04);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 20px; gap: 0;
+  }
+  #nextCard .cost { display: none; }
+  #elixir {
+    width: 100%; max-width: 620px;
+    padding: 0 14px 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #elixirBar {
+    position: relative; flex: 1 1 auto; height: 18px;
+    border-radius: 9px; background: #1a1430;
+    border: 1px solid rgba(255,255,255,.14);
+    overflow: hidden;
+  }
+  #elixirFill {
+    height: 100%; width: 50%;
+    background: linear-gradient(90deg, #b13ad6, #e05ad6);
+    transition: width .1s linear;
+  }
+  #elixirTicks {
+    position: absolute; inset: 0; display: flex;
+  }
+  #elixirTicks span { flex: 1; border-right: 1px solid rgba(0,0,0,.35); }
+  #elixirTicks span:last-child { border-right: 0; }
+  #elixirNum {
+    width: 34px; text-align: center; font-weight: 900; font-size: 18px;
+    color: #e592ff;
+  }
+  #overlay {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(6,9,20,.78); backdrop-filter: blur(3px);
+    border-radius: 12px; z-index: 5;
+  }
+  #overlay.show { display: flex; }
+  #overlay .panel {
+    text-align: center; padding: 26px 30px;
+    background: linear-gradient(180deg, #1d2745, #141a2e);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 16px; box-shadow: 0 16px 50px rgba(0,0,0,.6);
+  }
+  #overlay h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: 1px; }
+  #overlay p { margin: 0 0 16px; opacity: .75; font-size: 14px; }
+  #overlay button {
+    font: inherit; font-weight: 800; font-size: 16px;
+    padding: 11px 26px; border-radius: 12px; border: 0;
+    background: linear-gradient(180deg, #5a8bff, #2f6fed);
+    color: #fff; cursor: pointer;
+  }
+  #toast {
+    position: absolute; left: 50%; top: 16%;
+    transform: translateX(-50%);
+    background: rgba(224,69,69,.92);
+    color: #fff; font-weight: 700; font-size: 13px;
+    padding: 8px 14px; border-radius: 10px;
+    opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 6;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="crowns side-player">👑 <span id="crownP">0</span></div>
+    <div id="timer">3:00</div>
+    <div class="crowns side-enemy"><span id="crownE">0</span> 👑</div>
+  </div>
+
+  <div id="arenaWrap">
+    <canvas id="arena" width="540" height="960"></canvas>
+    <div id="overlay"><div class="panel">
+      <h1 id="ovTitle">Victory!</h1>
+      <p id="ovText"></p>
+      <button id="ovBtn">Play Again</button>
+    </div></div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="elixir">
+    <div id="elixirBar"><div id="elixirFill"></div><div id="elixirTicks"></div></div>
+    <div id="elixirNum">5</div>
+  </div>
+
+  <div id="hand">
+    <div id="cards"></div>
+    <div id="nextWrap">
+      <div class="lbl">NEXT</div>
+      <div id="nextCard"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WASM_BASE64 = "__WASM_BASE64__";
+
+const ARENA_W = 18, ARENA_H = 32, RIVER_Y0 = 15, RIVER_Y1 = 17;
+const BRIDGES = [3.5, 14.5];
+
+const CARD_META = [
+  { name: "Knight",    cost: 3, ico: "🛡️", color: "#c07a3e" },
+  { name: "Archers",   cost: 3, ico: "🏹", color: "#3fa34d" },
+  { name: "Giant",     cost: 5, ico: "🗿", color: "#b06a3b" },
+  { name: "Minions",   cost: 3, ico: "🦇", color: "#8a4fd0" },
+  { name: "Goblins",   cost: 2, ico: "👺", color: "#4aa832" },
+  { name: "Musketeer", cost: 4, ico: "🎯", color: "#2f80ed" },
+];
+
+const canvas = document.getElementById("arena");
+const ctx = canvas.getContext("2d");
+const el = (id) => document.getElementById(id);
+
+let wasm = null;
+let scale = 1;
+let last = performance.now();
+let acc = 0;
+let selected = -1;
+let hand = [0, 1, 2, 3];
+let nextCard = 4;
+let elixirVal = 5;
+let over = false;
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function loadWasm() {
+  const bytes = base64ToBytes(WASM_BASE64);
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  wasm = instance.exports;
+  wasm.init();
+}
+
+function resize() {
+  const wrap = el("arenaWrap");
+  const availW = wrap.clientWidth - 16;
+  const availH = wrap.clientHeight - 16;
+  let h = availH;
+  let w = h * (ARENA_W / ARENA_H);
+  if (w > availW) { w = availW; h = w * (ARENA_H / ARENA_W); }
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  scale = canvas.width / ARENA_W;
+}
+window.addEventListener("resize", resize);
+
+function readState() {
+  const ptr = wasm.state_ptr();
+  const len = wasm.state_len();
+  if (!readState.buf || readState.buf.byteLength < len * 4 || readState.buf.buffer !== wasm.memory.buffer) {
+    readState.buf = new Float32Array(wasm.memory.buffer, ptr, len);
+  }
+  return readState.buf;
+}
+readState.buf = null;
+
+function syncUI(t) {
+  // Elixir
+  elixirVal = t[0];
+  const pct = Math.max(0, Math.min(1, elixirVal / 10)) * 100;
+  el("elixirFill").style.width = pct + "%";
+  el("elixirNum").textContent = Math.floor(elixirVal);
+  el("crownP").textContent = t[10];
+  el("crownE").textContent = t[11];
+
+  const remain = Math.max(0, 180 - t[2]);
+  const m = Math.floor(remain / 60);
+  const s = Math.floor(remain % 60);
+  el("timer").textContent = m + ":" + String(s).padStart(2, "0");
+
+  hand = [t[5], t[6], t[7], t[8]];
+  nextCard = t[9];
+  renderCards();
+}
+
+let lastHandKey = "";
+function renderCards() {
+  const key = hand.join(",") + "|" + nextCard + "|" + Math.floor(elixirVal) + "|" + selected;
+  if (key === lastHandKey) return;
+  lastHandKey = key;
+  const wrap = el("cards");
+  wrap.innerHTML = "";
+  hand.forEach((cardIdx, pos) => {
+    const m = CARD_META[cardIdx];
+    const div = document.createElement("div");
+    div.className = "card" + (selected === pos ? " selected" : "") +
+      (elixirVal < m.cost ? " disabled" : "");
+    div.innerHTML = '<div class="cost">' + m.cost + '</div>' +
+      '<div class="ico">' + m.ico + '</div><div class="nm">' + m.name + '</div>';
+    div.onclick = () => selectCard(pos);
+    wrap.appendChild(div);
+  });
+  const nm = CARD_META[nextCard];
+  el("nextCard").innerHTML = '<div class="ico">' + nm.ico + '</div>';
+}
+
+function selectCard(pos) {
+  if (elixirVal < CARD_META[hand[pos]].cost) { toast("Not enough elixir"); return; }
+  selected = (selected === pos) ? -1 : pos;
+}
+
+function arenaCoords(ev) {
+  const r = canvas.getBoundingClientRect();
+  const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+  const cy = (ev.touches ? ev.touches[0].clientY : ev.clientY);
+  return {
+    x: ((cx - r.left) / r.width) * ARENA_W,
+    y: ((cy - r.top) / r.height) * ARENA_H,
+  };
+}
+
+function onArenaClick(ev) {
+  ev.preventDefault();
+  if (over) return;
+  if (selected < 0) { toast("Pick a card first"); return; }
+  const p = arenaCoords(ev);
+  if (p.y < RIVER_Y1) { toast("You can only deploy on your side"); return; }
+  const r = wasm.deploy(selected, p.x, p.y);
+  if (r === 0) {
+    selected = -1;
+    lastHandKey = "";
+  } else if (r === -2) {
+    toast("Can't deploy there");
+  } else if (r === -1) {
+    toast("Not enough elixir");
+  }
+}
+canvas.addEventListener("click", onArenaClick);
+
+let toastTimer = 0;
+function toast(msg) {
+  const t = el("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1200);
+}
+
+function draw() {
+  const t = readState();
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Field
+  ctx.fillStyle = "#3c8f4a";
+  ctx.fillRect(0, 0, W, H);
+  // subtle checker halves
+  ctx.fillStyle = "rgba(255,255,255,.03)";
+  ctx.fillRect(0, 0, W, H / 2);
+
+  // River
+  const ry0 = RIVER_Y0 * scale, ry1 = RIVER_Y1 * scale;
+  ctx.fillStyle = "#2f6fd0";
+  ctx.fillRect(0, ry0, W, ry1 - ry0);
+  ctx.fillStyle = "rgba(255,255,255,.10)";
+  for (let i = 0; i < 6; i++) {
+    ctx.fillRect(((i * 97) % W), ry0 + 6 + (i % 3) * 12, 40, 3);
+  }
+
+  // Bridges
+  ctx.fillStyle = "#8a5a2b";
+  for (const bx of BRIDGES) {
+    ctx.fillRect((bx - 1.1) * scale, ry0 - 6, 2.2 * scale, (ry1 - ry0) + 12);
+  }
+  ctx.strokeStyle = "rgba(0,0,0,.25)";
+  ctx.lineWidth = 2;
+  for (const bx of BRIDGES) {
+    ctx.strokeRect((bx - 1.1) * scale, ry0 - 6, 2.2 * scale, (ry1 - ry0) + 12);
+  }
+
+  // Deploy zone highlight
+  if (selected >= 0 && !over) {
+    ctx.fillStyle = "rgba(90,180,255,.14)";
+    ctx.fillRect(0, RIVER_Y1 * scale, W, H - RIVER_Y1 * scale);
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = "rgba(140,200,255,.6)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, RIVER_Y1 * scale);
+    ctx.lineTo(W, RIVER_Y1 * scale);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const count = t[4];
+  const start = 12;
+  for (let i = 0; i < count; i++) {
+    const o = start + i * 8;
+    const x = t[o] * scale, y = t[o + 1] * scale;
+    const hp = t[o + 2], maxHp = t[o + 3], team = t[o + 4], kind = t[o + 5];
+    if (kind === 3) {
+      ctx.beginPath();
+      ctx.fillStyle = team === 0 ? "#dff0ff" : "#ffd0d0";
+      ctx.arc(x, y, Math.max(2, 0.12 * scale), 0, Math.PI * 2);
+      ctx.fill();
+      continue;
+    }
+    if (kind === 1 || kind === 2) {
+      drawTower(x, y, scale * (kind === 2 ? 1.5 : 1.1), team, hp, maxHp, kind === 2);
+      continue;
+    }
+    drawUnit(x, y, t[o + 6], team, hp, maxHp, t[o + 7] * scale);
+  }
+}
+
+function drawTower(x, y, r, team, hp, maxHp, king) {
+  const col = team === 0 ? "#2f6fed" : "#e04545";
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.fillRect(x - r, y - r + 4, r * 2, r * 2);
+  ctx.fillStyle = col;
+  roundRect(x - r, y - r, r * 2, r * 2, r * 0.28);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,.35)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  // battlements
+  ctx.fillStyle = col;
+  const n = king ? 3 : 2;
+  for (let i = 0; i < n; i++) {
+    ctx.fillRect(x - r + (i + 0.5) * (r * 2 / n) - r * 0.14, y - r - r * 0.24, r * 0.28, r * 0.28);
+  }
+  if (king) {
+    ctx.font = Math.floor(r * 0.9) + "px serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("👑", x, y + 1);
+  }
+  hpBar(x, y - r - (king ? r * 0.5 : r * 0.35), r * 2.1, hp, maxHp);
+}
+
+function drawUnit(x, y, cardIdx, team, hp, maxHp, r) {
+  const m = CARD_META[cardIdx] || { color: "#999", ico: "?" };
+  const flying = cardIdx === 3;
+  if (flying) {
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.beginPath();
+    ctx.ellipse(x + 4, y + r * 0.9, r * 0.8, r * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.fillStyle = m.color;
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = Math.max(2, r * 0.22);
+  ctx.strokeStyle = team === 0 ? "#eaf1ff" : "#2a0b0b";
+  ctx.stroke();
+  ctx.font = Math.floor(r * 1.1) + "px serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(m.ico, x, y + 1);
+  hpBar(x, y - r - r * 0.55, r * 2.2, hp, maxHp);
+}
+
+function hpBar(cx, y, w, hp, maxHp) {
+  const h = Math.max(4, w * 0.11);
+  const x = cx - w / 2;
+  const frac = Math.max(0, Math.min(1, hp / maxHp));
+  ctx.fillStyle = "rgba(0,0,0,.55)";
+  roundRect(x - 1, y - 1, w + 2, h + 2, h * 0.5);
+  ctx.fill();
+  ctx.fillStyle = frac > 0.5 ? "#49d86b" : frac > 0.25 ? "#ffd23f" : "#ff5252";
+  roundRect(x, y, Math.max(1, w * frac), h, h * 0.5);
+  ctx.fill();
+}
+
+function roundRect(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function showResult(t) {
+  over = true;
+  const res = t[3];
+  const ov = el("overlay");
+  el("ovTitle").textContent = res === 1 ? "Victory!" : res === 2 ? "Defeat" : "Draw";
+  el("ovTitle").style.color = res === 1 ? "#7dff9b" : res === 2 ? "#ff8080" : "#ffd23f";
+  el("ovText").textContent = "Crowns  " + t[10] + " — " + t[11];
+  ov.classList.add("show");
+}
+
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (wasm) {
+    if (!over) {
+      acc += dt;
+      let guard = 0;
+      while (acc >= 1 / 60 && guard++ < 5) {
+        wasm.tick(1 / 60);
+        acc -= 1 / 60;
+      }
+    }
+    const t = readState();
+    syncUI(t);
+    draw();
+    if (!over && t[3] !== 0) showResult(t);
+  }
+  requestAnimationFrame(loop);
+}
+
+el("ovBtn").onclick = () => {
+  wasm.init();
+  over = false;
+  acc = 0;
+  selected = -1;
+  lastHandKey = "";
+  el("overlay").classList.remove("show");
+};
+
+(async function main() {
+  // build elixir tick marks
+  const ticks = el("elixirTicks");
+  for (let i = 0; i < 10; i++) ticks.appendChild(document.createElement("span"));
+  await loadWasm();
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

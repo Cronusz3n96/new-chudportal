@@ -16,6 +16,9 @@
 .docker/
 .cursor/
 .python/
+.cargo/
+.rustup/
+.ollama/
 
 # ── home dotfiles ──
 .bashrc
