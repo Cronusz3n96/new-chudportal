@@ -19,6 +19,9 @@ const LIMITS = {
 const AUTH_CACHE = new Map();
 const AUTH_CACHE_TTL = 60 * 1000; // seconds
 
+// Diagnostic counter for LAN relay proxy connections (surfaced via `wrangler tail`).
+let RELAY_SEQ = 0;
+
 function cors(headers = {}) {
   return {
     'Access-Control-Allow-Origin': '*',
@@ -254,24 +257,49 @@ export default {
 
       const [client, server] = Object.values(new WebSocketPair());
       server.accept();
+      const rid = ++RELAY_SEQ;
+      let upMsgs = 0, downMsgs = 0;
+      // 1005/1006 (and other reserved codes) can't be echoed back in a close
+      // frame; substitute a valid one so the downstream gets a clean close.
+      const safeCode = (c) =>
+        (c >= 1000 && c <= 1014 && c !== 1004 && c !== 1005 && c !== 1006) ? c : 1011;
       try {
+        console.log(`[relay] #${rid} open path=${url.pathname} up=${upstreamUrl} origin=${request.headers.get('origin') || '-'} ua=${request.headers.get('user-agent') || '-'}`);
         const headers = new Headers(request.headers);
         headers.delete('host');
         try { headers.set('origin', `https://${url.host}`); } catch (e) { /* origin optional */ }
         const upstreamResp = await fetch(upstreamUrl, { method: 'GET', headers });
         const upstream = upstreamResp.webSocket;
+        console.log(`[relay] #${rid} upstream status=${upstreamResp.status} gotWs=${!!upstream}`);
         if (!upstream) {
           server.close(1011, `relay upstream HTTP ${upstreamResp.status}`);
         } else {
           upstream.accept();
-          server.addEventListener('message', (e) => { try { upstream.send(e.data); } catch (err) { /* peer gone */ } });
-          upstream.addEventListener('message', (e) => { try { server.send(e.data); } catch (err) { /* peer gone */ } });
-          server.addEventListener('close', (e) => { try { upstream.close(e.code, e.reason); } catch (err) { /* peer gone */ } });
-          upstream.addEventListener('close', (e) => { try { server.close(e.code, e.reason); } catch (err) { /* peer gone */ } });
-          server.addEventListener('error', () => { try { upstream.close(1011, 'pipe error'); } catch (err) { /* peer gone */ } });
-          upstream.addEventListener('error', () => { try { server.close(1011, 'pipe error'); } catch (err) { /* peer gone */ } });
+          server.addEventListener('message', (e) => {
+            downMsgs++;
+            const n = e.data && e.data.byteLength;
+            if (downMsgs <= 3 || (n && n > 65536)) console.log(`[relay] #${rid} c->u #${downMsgs} bytes=${n}`);
+            try { upstream.send(e.data); } catch (err) { console.log(`[relay] #${rid} c->u send failed: ${err && err.message}`); }
+          });
+          upstream.addEventListener('message', (e) => {
+            upMsgs++;
+            const n = e.data && e.data.byteLength;
+            if (upMsgs <= 3 || (n && n > 65536)) console.log(`[relay] #${rid} u->c #${upMsgs} bytes=${n}`);
+            try { server.send(e.data); } catch (err) { console.log(`[relay] #${rid} u->c send failed: ${err && err.message}`); }
+          });
+          server.addEventListener('close', (e) => {
+            console.log(`[relay] #${rid} client-close code=${e.code} reason=${JSON.stringify(e.reason || '')} upMsgs=${upMsgs} downMsgs=${downMsgs}`);
+            try { upstream.close(safeCode(e.code), e.reason); } catch (err) { /* peer gone */ }
+          });
+          upstream.addEventListener('close', (e) => {
+            console.log(`[relay] #${rid} upstream-close code=${e.code} reason=${JSON.stringify(e.reason || '')} upMsgs=${upMsgs} downMsgs=${downMsgs}`);
+            try { server.close(safeCode(e.code), e.reason); } catch (err) { /* peer gone */ }
+          });
+          server.addEventListener('error', (e) => { console.log(`[relay] #${rid} client-error ${e && e.message}`); try { upstream.close(1011, 'pipe error'); } catch (err) { /* peer gone */ } });
+          upstream.addEventListener('error', (e) => { console.log(`[relay] #${rid} upstream-error ${e && e.message}`); try { server.close(1011, 'pipe error'); } catch (err) { /* peer gone */ } });
         }
       } catch (err) {
+        console.log(`[relay] #${rid} connect-failed ${err && err.message}`);
         server.close(1011, 'relay connect failed');
       }
       return new Response(null, { status: 101, webSocket: client });
